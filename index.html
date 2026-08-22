@@ -2891,7 +2891,7 @@
       }
 
       async function pullCloudData() {
-        const snap = await cloudDataRef().get()
+        const snap = await cloudDataRef().once('value')
         const d = snap.val() || {}
         ;[
           'hotink_invoices',
