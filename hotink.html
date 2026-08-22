@@ -1,0 +1,2856 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HotInk</title>
+    <meta name="theme-color" content="#f97316" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="HotInk" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        background: #e9e9ee;
+      }
+
+      /* Conteneur format mobile */
+      .app {
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: #ffffff;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.12);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Barre de navigation orange */
+      .navbar {
+        background: #f97316;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 84px;
+        padding: 16px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      /* Logo HotInk */
+      .logo {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        user-select: none;
+      }
+
+      .logo span {
+        opacity: 0.9;
+      }
+
+      /* Logo entreprise dans la navbar : inversé en blanc, centré */
+      .nav-logo {
+        height: 40px;
+        max-width: 150px;
+        object-fit: contain;
+        filter: invert(1);
+      }
+
+      /* Reste de la page : blanc */
+      .page {
+        flex: 1;
+        background: #ffffff;
+        padding: 20px;
+      }
+
+      /* Cartes du menu */
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      /* Signature discrète sous les cartes */
+      .credit {
+        margin-top: 22px;
+        text-align: center;
+        font-size: 10.5px;
+        letter-spacing: 0.02em;
+        color: #c7cbd1;
+        user-select: none;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #ffffff;
+        border: 1px solid #ececec;
+        border-radius: 16px;
+        padding: 22px 12px;
+        min-height: 160px;
+        font-family: inherit;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #1f2937;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .card:active {
+        transform: scale(0.97);
+      }
+
+      .card-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #fff3ea;
+        color: #f97316;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* ---------- Écrans ---------- */
+      .screen-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .back-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid #ececec;
+        background: #ffffff;
+        color: #f97316;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .screen-title {
+        font-size: 19px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+
+      /* ---------- Formulaire ---------- */
+      .field {
+        margin-bottom: 16px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      .field input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #e2e2e8;
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: inherit;
+        outline: none;
+        transition: border 0.15s;
+      }
+
+      .field input:focus {
+        border-color: #f97316;
+      }
+
+      /* ---------- Lignes produits ---------- */
+      .section-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 22px 0 10px;
+      }
+
+      .item-row {
+        position: relative;
+        border: 1px solid #ececec;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Laisse la place au bouton de fermeture en haut à droite */
+      .item-row .field:first-child {
+        padding-right: 34px;
+      }
+
+      .item-remove {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 8px;
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .item-remove:hover {
+        background: #fecaca;
+      }
+
+      .item-row .field {
+        margin-bottom: 12px;
+      }
+
+      .item-row .field:last-child {
+        margin-bottom: 0;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      /* Prix + devise */
+      .price-wrap {
+        display: flex;
+        gap: 8px;
+      }
+
+      .price-wrap .inp-price {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .currency-select {
+        width: 78px;
+        padding: 12px 8px;
+        border: 1px solid #e2e2e8;
+        border-radius: 12px;
+        background: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        color: #374151;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .currency-select:focus {
+        border-color: #f97316;
+      }
+
+      .add-btn {
+        width: 100%;
+        padding: 14px;
+        border: 2px dashed #fdba74;
+        border-radius: 14px;
+        background: #fffdfa;
+        color: #f97316;
+        font-family: inherit;
+        font-size: 14.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .add-btn:active {
+        background: #fff3ea;
+      }
+
+      /* ---------- Total ---------- */
+      .total-box {
+        margin-top: 24px;
+        background: #fff3ea;
+        border: 1px solid #fed7aa;
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .total-box span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #9a3412;
+      }
+
+      .total-box strong {
+        font-size: 22px;
+        font-weight: 800;
+        color: #c2410c;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ---------- Catalogue ---------- */
+      .choice-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .choice-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 120px;
+        background: #ffffff;
+        border: 2px solid #ececec;
+        border-radius: 16px;
+        font-family: inherit;
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .choice-btn svg {
+        color: #9ca3af;
+      }
+
+      .choice-btn.active {
+        border-color: #f97316;
+        background: #fff3ea;
+        color: #c2410c;
+      }
+
+      .choice-btn.active svg {
+        color: #f97316;
+      }
+
+      .type-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 99px;
+        background: #fff3ea;
+        color: #c2410c;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 14px;
+      }
+
+      .catalog-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid #ececec;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .ci-name {
+        font-weight: 700;
+        font-size: 14.5px;
+        color: #1f2937;
+      }
+
+      .ci-sub {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 2px;
+      }
+
+      .ci-price {
+        font-weight: 800;
+        color: #c2410c;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .btn-save {
+        width: 100%;
+        padding: 14px;
+        margin-top: 4px;
+        border: none;
+        border-radius: 12px;
+        background: #f97316;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .btn-save:active {
+        background: #ea580c;
+      }
+
+      .empty-hint {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+        padding: 18px 0;
+      }
+
+      /* ---------- Historique des factures ---------- */
+      .hist-item {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #ececec;
+        border-radius: 14px;
+        padding: 14px 38px 14px 14px;
+        margin-bottom: 10px;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+
+      .hist-item:hover {
+        border-color: #fdba74;
+      }
+
+      .hist-remove {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 7px;
+        background: #fee2e2;
+        color: #dc2626;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .hist-remove:hover {
+        background: #fecaca;
+      }
+
+      /* Bouton « convertir en facture » sur les proformas */
+      .hist-convert {
+        position: absolute;
+        top: 40px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 7px;
+        background: #dcfce7;
+        color: #15803d;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .hist-convert:hover {
+        background: #bbf7d0;
+      }
+
+      /* ---------- Filtres (paiements / statistiques) ---------- */
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .filter-btn {
+        padding: 8px 13px;
+        border: 1.5px solid #ececec;
+        border-radius: 99px;
+        background: #ffffff;
+        color: #6b7280;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .filter-btn.active {
+        border-color: #f97316;
+        background: #fff3ea;
+        color: #c2410c;
+      }
+
+      /* ---------- Statuts de paiement ---------- */
+      .pay-chip {
+        display: inline-block;
+        padding: 2px 9px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 800;
+        vertical-align: middle;
+      }
+
+      .pay-chip.unpaid {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .pay-chip.partial {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+
+      .pay-chip.paid {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      /* Panneau détail d'une facture */
+      .detail-panel {
+        margin-top: 16px;
+        background: #ffffff;
+        border: 1px solid #ececec;
+        border-radius: 16px;
+        padding: 16px 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .panel-lines div {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 7px 0;
+        border-bottom: 1px dashed #f3f4f6;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .panel-lines div:last-child {
+        border-bottom: none;
+      }
+
+      .panel-lines strong {
+        font-variant-numeric: tabular-nums;
+        color: #1f2937;
+      }
+
+      .panel-lines div:nth-child(3) strong {
+        color: #c2410c;
+      }
+
+      .pay-entry {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 34px 9px 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 13.5px;
+        color: #374151;
+      }
+
+      .pay-entry .item-remove {
+        top: 50%;
+        transform: translateY(-50%);
+        right: 0;
+      }
+
+      /* ---------- Statistiques ---------- */
+      .stat-block {
+        background: #fffdfa;
+        border: 1px solid #fed7aa;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 14px;
+      }
+
+      .stat-cur {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #c2410c;
+        margin-bottom: 6px;
+      }
+
+      .stat-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        padding: 7px 0;
+        border-bottom: 1px dashed #f3f4f6;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .stat-line:last-child {
+        border-bottom: none;
+      }
+
+      .stat-line strong {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        color: #1f2937;
+      }
+
+      /* ---------- Notifications intégrées ---------- */
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 26px;
+        transform: translateX(-50%) translateY(16px);
+        max-width: min(420px, calc(100vw - 32px));
+        background: #1f2937;
+        color: #ffffff;
+        font-size: 13.5px;
+        font-weight: 600;
+        line-height: 1.45;
+        padding: 13px 18px;
+        border-radius: 12px;
+        border-left: 4px solid #f97316;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        z-index: 200;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.45);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 300;
+      }
+
+      /* Le display:flex ci-dessus écraserait l'attribut hidden sans cette règle */
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal {
+        width: 100%;
+        max-width: 330px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+      }
+
+      .modal-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 8px;
+      }
+
+      .modal-msg {
+        font-size: 13.5px;
+        color: #6b7280;
+        line-height: 1.55;
+        margin-bottom: 18px;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .modal-actions > button {
+        flex: 1;
+        width: auto;
+        padding: 11px 10px;
+        font-size: 14px;
+      }
+
+      .btn-save.danger {
+        background: #f97316;
+      }
+
+      .btn-save.danger:active {
+        background: #ea580c;
+      }
+
+      /* ---------- Choix du logo (Paramètre) ---------- */
+      .logo-pick {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 4px;
+      }
+
+      .logo-thumb {
+        width: 68px;
+        height: 68px;
+        flex-shrink: 0;
+        border: 1.5px dashed #fdba74;
+        border-radius: 12px;
+        background: #fffbf7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .logo-thumb img {
+        max-width: 62px;
+        max-height: 62px;
+        object-fit: contain;
+      }
+
+      .logo-hint {
+        font-size: 11px;
+        color: #c7cbd1;
+        padding: 0 6px;
+        text-align: center;
+      }
+
+      .btn-mini {
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #ea580c;
+        background: #ffffff;
+        border: 1.5px solid #fdba74;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+      }
+
+      .btn-mini:hover {
+        background: #fff3ea;
+      }
+
+      .hist-num {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        color: #ea580c;
+        background: #fff3ea;
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-bottom: 5px;
+      }
+
+      .hist-client {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+
+      .hist-date {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 2px;
+      }
+
+      .hist-amt {
+        font-size: 14px;
+        font-weight: 800;
+        color: #1f2937;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ---------- Actions facture ---------- */
+      .actions-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .btn-preview {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #f97316;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #ea580c;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .btn-preview:active {
+        background: #fff3ea;
+      }
+
+      /* ---------- Document facture (page A4) ---------- */
+      .sheet-wrap {
+        position: relative;
+        background: #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      /* Feuille A4 réelle : 794 × 1123 px à 96 dpi */
+      .a4 {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 794px;
+        height: 1123px;
+        padding: 64px 56px;
+        box-sizing: border-box;
+        background: #ffffff;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.18);
+        display: flex;
+        flex-direction: column;
+        color: #111827;
+        transform: translateX(-50%) scale(var(--s, 0.45));
+        transform-origin: top center;
+      }
+
+      .inv-doc {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .inv-co-name {
+        font-size: 19px;
+        font-weight: 800;
+        color: #f97316;
+        margin-bottom: 6px;
+      }
+
+      /* En-tête : infos société à gauche, logo à droite centré verticalement */
+      .inv-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .inv-logo {
+        max-width: 185px;
+        max-height: 118px;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+
+      .inv-co-line {
+        font-size: 13.5px;
+        color: #6b7280;
+        line-height: 1.7;
+      }
+
+      .inv-meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin: 24px 0 6px;
+      }
+
+      .inv-dest-to {
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .inv-date {
+        font-size: 14px;
+        color: #374151;
+        text-align: right;
+      }
+
+      .inv-client {
+        font-size: 17px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+
+      .inv-grid {
+        display: grid;
+        grid-template-columns: 96px 1fr auto;
+        align-items: stretch;
+      }
+
+      .inv-h {
+        font-size: 12.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: #f97316;
+        color: #ffffff;
+        padding: 10px 8px;
+      }
+
+      .inv-h.pu,
+      .inv-cell-pu {
+        text-align: right;
+      }
+
+      .inv-cell {
+        font-size: 14.5px;
+        padding: 12px 8px;
+        border-bottom: 1px solid #374151;
+      }
+
+      /* Séparateurs uniquement entre les produits :
+         jamais de trait sous la dernière ligne (le total orange fait la séparation) */
+      .inv-grid .inv-cell:nth-last-child(-n + 3) {
+        border-bottom: none;
+      }
+
+      .inv-cell-pu {
+        font-weight: 600;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .inv-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 22px;
+        padding-top: 14px;
+        border-top: 2px solid #f97316;
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .inv-total strong {
+        font-size: 19px;
+        color: #ea580c;
+      }
+
+      /* Conditions collées au bas de la feuille */
+      .inv-terms {
+        margin-top: auto;
+        padding-top: 36px;
+      }
+
+      .inv-terms-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 18px;
+        margin-bottom: 4px;
+      }
+
+      .inv-terms-text {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      /* Numéro de facture vertical sur le bord gauche */
+      .inv-num {
+        position: absolute;
+        left: 0;
+        top: 175px;
+        bottom: 0;
+        width: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .inv-num-txt {
+        font-size: 34px;
+        font-weight: 400;
+        letter-spacing: 2px;
+        color: #374151;
+        white-space: nowrap;
+        transform: rotate(-90deg);
+      }
+
+      .inv-num-txt > span {
+        color: #f97316;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <nav class="navbar">
+        <img id="nav-logo" class="nav-logo" alt="" hidden />
+        <div class="logo" id="nav-brand-text">Hot<span>Ink</span></div>
+      </nav>
+
+      <main class="page">
+        <!-- ÉCRAN ACCUEIL -->
+        <section id="screen-home">
+          <div class="cards">
+            <button class="card" type="button" id="btn-new-invoice">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="12" x2="12" y2="18" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
+                </svg>
+              </span>
+              Nouvelle facture
+            </button>
+
+            <button class="card" type="button" id="btn-new-proforma">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                  <line x1="9" y1="12" x2="15" y2="12" />
+                  <line x1="9" y1="16" x2="13" y2="16" />
+                </svg>
+              </span>
+              Facture proforma
+            </button>
+
+            <button class="card" type="button" id="btn-history">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </span>
+              Historique des factures
+            </button>
+
+            <button class="card" type="button" id="btn-payments">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="6" width="20" height="12" rx="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <path d="M6 12h.01M18 12h.01" />
+                </svg>
+              </span>
+              Paiements
+            </button>
+
+            <button class="card" type="button" id="btn-stats">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="20" x2="12" y2="10" />
+                  <line x1="18" y1="20" x2="18" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="16" />
+                </svg>
+              </span>
+              Statistiques
+            </button>
+
+            <button class="card" type="button" id="btn-clients">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </span>
+              Clients
+            </button>
+
+            <button class="card" type="button" id="btn-catalogue">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+              </span>
+              Catalogue
+            </button>
+
+            <button class="card" type="button" id="btn-settings">
+              <span class="card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </span>
+              Paramètre
+            </button>
+          </div>
+          <div class="credit">© Rob art &amp; design 2026</div>
+        </section>
+
+        <!-- ÉCRAN NOUVELLE FACTURE -->
+        <section id="screen-invoice" hidden>
+          <div class="screen-head">
+            <button id="btn-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title" id="invoice-screen-title">Nouvelle facture</h2>
+          </div>
+
+          <div class="field">
+            <label for="client-name">Nom du client</label>
+            <input type="text" id="client-name" list="dl-clients" placeholder="Nom du client…" />
+          </div>
+
+          <div class="field">
+            <label for="invoice-date">Date de la facture</label>
+            <input type="date" id="invoice-date" />
+          </div>
+
+          <div class="section-label">Produits / Services</div>
+          <div id="items"></div>
+
+          <button id="btn-add-item" class="add-btn" type="button">+ Ajouter un produit ou service</button>
+
+          <div class="total-box">
+            <span>Montant total</span>
+            <strong id="total-amount">0,00</strong>
+          </div>
+
+          <div class="actions-row">
+            <button id="btn-preview" class="btn-preview" type="button">Aperçu de la facture</button>
+            <button id="btn-save-invoice" class="btn-save" type="button">Enregistrer la facture</button>
+          </div>
+        </section>
+
+        <!-- ÉCRAN APERÇU FACTURE -->
+        <section id="screen-preview" hidden>
+          <div class="screen-head">
+            <button id="btn-preview-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Aperçu de la facture</h2>
+          </div>
+          <div id="preview-content">
+            <div class="sheet-wrap" id="sheet-wrap">
+              <div class="a4" id="a4-sheet"></div>
+            </div>
+          </div>
+
+          <button id="btn-download-pdf" class="btn-save" type="button" style="margin-top:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Télécharger en PDF
+          </button>
+        </section>
+
+        <!-- ÉCRAN CATALOGUE -->
+        <section id="screen-catalog" hidden>
+          <div class="screen-head">
+            <button id="btn-catalog-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Catalogue</h2>
+          </div>
+
+          <button id="btn-catalog-add" class="add-btn" type="button">+ Nouvel article</button>
+
+          <div id="catalog-form-zone" hidden style="margin-top: 16px">
+            <div class="choice-row">
+              <button type="button" class="choice-btn active" data-type="produit">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+                Produit
+              </button>
+              <button type="button" class="choice-btn" data-type="service">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Service
+              </button>
+            </div>
+
+            <span class="type-badge" id="cat-type-badge">Produit</span>
+
+            <div class="field">
+              <label for="cat-name">Nom</label>
+              <input type="text" id="cat-name" placeholder="Ex : Impression A4, Consultation…" />
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label>Prix unitaire</label>
+                <div class="price-wrap">
+                  <input type="text" inputmode="decimal" id="cat-price" placeholder="0,00" />
+                  <select class="currency-select" id="cat-currency" title="Devise">
+                    <option value="$">$</option>
+                    <option value="€">€</option>
+                    <option value="FC" selected>FC</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field" id="cat-field-stock">
+                <label>Quantité en stock</label>
+                <input type="text" inputmode="decimal" id="cat-stock" placeholder="Illimité" />
+              </div>
+              <div class="field" id="cat-field-unit" hidden>
+                <label>Unité de facturation</label>
+                <select id="cat-unit">
+                  <option value="/ heure">Heure</option>
+                  <option value="/ jour">Jour</option>
+                  <option value="/ mois">Mois</option>
+                  <option value="/ prestation">Forfait</option>
+                </select>
+              </div>
+            </div>
+
+            <button id="btn-catalog-save" class="btn-save" type="button">Enregistrer au catalogue</button>
+          </div>
+
+          <div class="section-label">Articles enregistrés</div>
+          <div id="catalog-list"></div>
+        </section>
+
+        <!-- ÉCRAN HISTORIQUE -->
+        <section id="screen-history" hidden>
+          <div class="screen-head">
+            <button id="btn-history-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Historique des factures</h2>
+          </div>
+          <div id="history-list"></div>
+        </section>
+
+        <!-- ÉCRAN PAIEMENTS -->
+        <section id="screen-payments" hidden>
+          <div class="screen-head">
+            <button id="btn-payments-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Suivi des paiements</h2>
+          </div>
+
+          <div class="chip-row">
+            <button class="filter-btn active" type="button" data-filter="all">Toutes</button>
+            <button class="filter-btn" type="button" data-filter="unpaid">Impayées</button>
+            <button class="filter-btn" type="button" data-filter="partial">Partielles</button>
+            <button class="filter-btn" type="button" data-filter="paid">Payées</button>
+          </div>
+
+          <div id="payments-list"></div>
+          <div id="payment-panel" class="detail-panel" hidden></div>
+        </section>
+
+        <!-- ÉCRAN STATISTIQUES -->
+        <section id="screen-stats" hidden>
+          <div class="screen-head">
+            <button id="btn-stats-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Statistiques</h2>
+          </div>
+
+          <div class="chip-row">
+            <button class="filter-btn active" type="button" data-period="month">Ce mois</button>
+            <button class="filter-btn" type="button" data-period="lastmonth">Mois dernier</button>
+            <button class="filter-btn" type="button" data-period="year">Cette année</button>
+            <button class="filter-btn" type="button" data-period="all">Tout</button>
+          </div>
+
+          <div id="stats-content"></div>
+        </section>
+
+        <!-- ÉCRAN CLIENTS -->
+        <section id="screen-clients" hidden>
+          <div class="screen-head">
+            <button id="btn-clients-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Clients</h2>
+          </div>
+
+          <button id="btn-client-add" class="add-btn" type="button">+ Nouveau client</button>
+
+          <div id="client-form-zone" hidden style="margin-top: 16px">
+            <div class="field">
+              <label for="client-form-name">Nom</label>
+              <input type="text" id="client-form-name" placeholder="Nom du client…" />
+            </div>
+            <div class="field">
+              <label for="client-form-phone">Téléphone</label>
+              <input type="tel" inputmode="tel" id="client-form-phone" />
+            </div>
+            <button id="btn-client-save" class="btn-save" type="button">Enregistrer le client</button>
+          </div>
+
+          <div class="section-label">Clients enregistrés</div>
+          <div id="clients-list"></div>
+        </section>
+
+        <!-- ÉCRAN PARAMÈTRE -->
+        <section id="screen-settings" hidden>
+          <div class="screen-head">
+            <button id="btn-settings-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title">Paramètre</h2>
+          </div>
+
+          <div class="section-label">Informations de l'entreprise</div>
+
+          <div class="field">
+            <label for="set-name">Nom de l'entreprise</label>
+            <input type="text" id="set-name" placeholder="Ex : HOT INK SARL" />
+          </div>
+
+          <div class="field">
+            <label for="set-rccm">RCCM</label>
+            <input type="text" id="set-rccm" />
+          </div>
+
+          <div class="field">
+            <label for="set-idnat">IDNAT</label>
+            <input type="text" id="set-idnat" />
+          </div>
+
+          <div class="field">
+            <label for="set-address">Adresse</label>
+            <input type="text" id="set-address" />
+          </div>
+
+          <div class="field">
+            <label for="set-phone">Téléphone</label>
+            <input type="tel" inputmode="tel" id="set-phone" />
+          </div>
+
+          <div class="section-label">Conditions de paiement</div>
+
+          <div class="field">
+            <label for="set-terms-title">Titre des conditions</label>
+            <input type="text" id="set-terms-title" placeholder="Conditions et modalités de paiement" />
+          </div>
+
+          <div class="field">
+            <label for="set-terms-text">Texte des conditions</label>
+            <input type="text" id="set-terms-text" placeholder="Payment is due within 15 days" />
+          </div>
+
+          <div class="field">
+            <label>Logo de l'entreprise (affiché sur la facture)</label>
+            <div class="logo-pick">
+              <div class="logo-thumb">
+                <img id="logo-preview" alt="" hidden />
+                <span id="logo-hint" class="logo-hint">Aucun logo</span>
+              </div>
+              <div>
+                <input type="file" id="logo-input" accept="image/*" hidden />
+                <button id="btn-logo-pick" class="btn-mini" type="button">Choisir un fichier…</button>
+                <button id="btn-logo-remove" class="btn-mini" type="button" hidden>Retirer</button>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-settings-save" class="btn-save" type="button" style="margin-top:16px">Enregistrer les paramètres</button>
+        </section>
+
+            <datalist id="dl-catalog"></datalist>
+            <datalist id="dl-clients"></datalist>
+      </main>
+    </div>
+
+    <!-- Notification intégrée -->
+    <div id="toast" class="toast" role="status"></div>
+
+    <!-- Modale de confirmation intégrée -->
+    <div id="modal-overlay" class="modal-overlay" hidden>
+      <div class="modal">
+        <div class="modal-title" id="modal-title">Confirmation</div>
+        <div class="modal-msg" id="modal-msg"></div>
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn-preview" type="button">Annuler</button>
+          <button id="modal-ok" class="btn-save" type="button">Confirmer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Génération PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+      const screenHome = document.getElementById('screen-home')
+      const screenInvoice = document.getElementById('screen-invoice')
+      const itemsWrap = document.getElementById('items')
+
+      /* ---------- Notifications & confirmation intégrées ---------- */
+      let toastTimer = null
+
+      function showToast(message) {
+        const t = document.getElementById('toast')
+        t.textContent = message
+        t.classList.add('show')
+        clearTimeout(toastTimer)
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800)
+      }
+
+      function showConfirm({ title = 'Confirmation', message, okText = 'Confirmer', danger = false }) {
+        return new Promise((resolve) => {
+          const overlay = document.getElementById('modal-overlay')
+          const titleEl = document.getElementById('modal-title')
+          const msgEl = document.getElementById('modal-msg')
+          const okBtn = document.getElementById('modal-ok')
+          const cancelBtn = document.getElementById('modal-cancel')
+
+          titleEl.textContent = title
+          msgEl.textContent = message
+          okBtn.textContent = okText
+          okBtn.classList.toggle('danger', danger)
+
+          function close(value) {
+            overlay.hidden = true
+            okBtn.removeEventListener('click', onOk)
+            cancelBtn.removeEventListener('click', onCancel)
+            overlay.removeEventListener('click', onOverlay)
+            resolve(value)
+          }
+          function onOk() { close(true) }
+          function onCancel() { close(false) }
+          function onOverlay(e) { if (e.target === overlay) close(false) }
+
+          okBtn.addEventListener('click', onOk)
+          cancelBtn.addEventListener('click', onCancel)
+          overlay.addEventListener('click', onOverlay)
+          overlay.hidden = false
+        })
+      }
+
+      /* ---------- Catalogue ---------- */
+      let catalog = []
+      try {
+        catalog = JSON.parse(localStorage.getItem('hotink_catalog') || '[]')
+      } catch {
+        catalog = []
+      }
+
+      function persistCatalog() {
+        localStorage.setItem('hotink_catalog', JSON.stringify(catalog))
+      }
+
+      function refreshDatalist() {
+        document.getElementById('dl-catalog').innerHTML = catalog
+          .map((c) => `<option value="${c.name.replace(/"/g, '&quot;')}">`)
+          .join('')
+      }
+
+      function renderCatalog() {
+        const wrap = document.getElementById('catalog-list')
+        if (catalog.length === 0) {
+          wrap.innerHTML = '<div class="empty-hint">Aucun article pour le moment.</div>'
+          return
+        }
+        wrap.innerHTML = ''
+        catalog.forEach((item) => {
+          const div = document.createElement('div')
+          div.className = 'catalog-item'
+          const sub =
+            item.type === 'produit'
+              ? `Produit${item.stock ? ' · stock : ' + item.stock : ''}`
+              : `Service ${item.unit || ''}`
+          div.innerHTML = `
+            <div>
+              <div class="ci-name">${escapeHtml(item.name)}</div>
+              <div class="ci-sub">${escapeHtml(sub)}</div>
+            </div>
+            <div class="ci-price">${fmt(item.price)} ${item.currency}</div>`
+          wrap.appendChild(div)
+        })
+      }
+
+      /* ---------- Gestion du stock ---------- */
+      function findCatalogArticle(name) {
+        return catalog.find(
+          (c) =>
+            c.type === 'produit' &&
+            c.name.toLowerCase() === name.trim().toLowerCase(),
+        )
+      }
+
+      function articleStockNum(art) {
+        /* Stock non renseigné = illimité (null) */
+        if (!art || art.type !== 'produit') return null
+        const v = parseFloat(art.stock)
+        return art.stock === '' || art.stock == null || isNaN(v) ? null : v
+      }
+
+      /* Contrôle puis décrément du stock pour une facture ; false si insuffisant */
+      function applyStockForInvoice(items) {
+        const lignes = items
+          .map((it) => ({ it, art: findCatalogArticle(it.name) }))
+          .filter((x) => x.art)
+        const manquants = lignes
+          .filter(
+            ({ it, art }) =>
+              articleStockNum(art) !== null && it.qty > articleStockNum(art),
+          )
+          .map(({ art }) => art.name)
+        if (manquants.length > 0) {
+          showToast(`Stock insuffisant pour : ${manquants.join(', ')}.`)
+          return false
+        }
+        lignes.forEach(({ it, art }) => {
+          const dispo = articleStockNum(art)
+          if (dispo !== null) {
+            art.stock = String(Math.round((dispo - it.qty) * 1000) / 1000)
+          }
+        })
+        persistCatalog()
+        return true
+      }
+
+      /* ---------- Devise globale ---------- */
+      function syncCurrency(value, source) {
+        document.querySelectorAll('.currency-select').forEach((s) => {
+          if (s !== source) s.value = value
+        })
+        recalcTotal()
+      }
+
+      function parseNum(v) {
+        const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.'))
+        return isNaN(n) ? 0 : n
+      }
+
+      function fmt(n) {
+        return new Intl.NumberFormat('fr-FR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(n)
+      }
+
+      /* ---------- Date du document ---------- */
+      function todayISO() {
+        const d = new Date()
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+          d.getDate(),
+        ).padStart(2, '0')}`
+      }
+
+      function resetInvoiceDate() {
+        document.getElementById('invoice-date').value = todayISO()
+      }
+
+      function getInvoiceDate() {
+        /* Date choisie dans le formulaire, aujourd'hui par défaut */
+        const v = document.getElementById('invoice-date').value
+        return v ? new Date(`${v}T00:00:00`) : new Date()
+      }
+
+      /* Échappe tout contenu saisi avant injection en innerHTML */
+      function escapeHtml(v) {
+        return String(v ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      }
+
+      function recalcTotal() {
+        let total = 0
+        itemsWrap.querySelectorAll('.item-row').forEach((row) => {
+          const qty = parseNum(row.querySelector('.inp-qty').value)
+          const pu = parseNum(row.querySelector('.inp-price').value)
+          total += qty * pu
+        })
+        const symbol = itemsWrap.querySelector('.currency-select')?.value || ''
+        document.getElementById('total-amount').textContent = `${fmt(total)} ${symbol}`
+      }
+
+      function addItemRow() {
+        const div = document.createElement('div')
+        div.className = 'item-row'
+        div.innerHTML = `
+          <div class="field">
+            <label>Produit / Service</label>
+            <input type="text" class="inp-name" list="dl-catalog" placeholder="Désignation…" autocomplete="off" />
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Prix unitaire</label>
+              <div class="price-wrap">
+                <input type="text" inputmode="decimal" class="inp-price" placeholder="0,00" />
+                <select class="currency-select" title="Devise">
+                  <option value="$">$</option>
+                  <option value="€">€</option>
+                  <option value="FC" selected>FC</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Quantité</label>
+              <input type="text" inputmode="decimal" class="inp-qty" value="1" />
+            </div>
+          </div>
+          <button type="button" class="item-remove" title="Supprimer cette ligne" aria-label="Supprimer">X</button>`
+        div.querySelectorAll('input').forEach((inp) => inp.addEventListener('input', recalcTotal))
+
+        const nameInput = div.querySelector('.inp-name')
+        const priceInput = div.querySelector('.inp-price')
+        nameInput.addEventListener('input', () => {
+          const found = catalog.find(
+            (c) => c.name.toLowerCase() === nameInput.value.trim().toLowerCase(),
+          )
+          if (found) priceInput.value = String(found.price).replace('.', ',')
+          recalcTotal()
+        })
+
+        const select = div.querySelector('.currency-select')
+        select.addEventListener('change', () => syncCurrency(select.value, select))
+
+        div.querySelector('.item-remove').addEventListener('click', async () => {
+          const yes = await showConfirm({
+            title: 'Supprimer la ligne',
+            message: 'Cette ligne sera retirée de la facture.',
+            okText: 'Supprimer',
+            danger: true,
+          })
+          if (yes) {
+            div.remove()
+            recalcTotal()
+          }
+        })
+
+        itemsWrap.appendChild(div)
+      }
+
+      document.getElementById('btn-add-item').addEventListener('click', addItemRow)
+
+      /* ---------- Écran catalogue ---------- */
+      const screenCatalog = document.getElementById('screen-catalog')
+      const catalogFormZone = document.getElementById('catalog-form-zone')
+      const catTypeBadge = document.getElementById('cat-type-badge')
+      let currentType = 'produit'
+
+      /* ---------- Création facture / proforma (même écran, mode différent) ---------- */
+      let docMode = 'facture'
+
+      function openNewDoc(kind) {
+        if (docMode !== kind) {
+          /* Changement de type de document : brouillon vidé */
+          document.getElementById('client-name').value = ''
+          itemsWrap.innerHTML = ''
+          resetInvoiceDate()
+          recalcTotal()
+        }
+        if (!document.getElementById('invoice-date').value) resetInvoiceDate()
+        docMode = kind
+        document.getElementById('invoice-screen-title').textContent =
+          kind === 'proforma' ? 'Nouvelle facture proforma' : 'Nouvelle facture'
+        showScreen(screenInvoice)
+        if (itemsWrap.children.length === 0) addItemRow()
+      }
+
+      document.getElementById('btn-new-invoice').addEventListener('click', () =>
+        openNewDoc('facture'),
+      )
+
+      document.getElementById('btn-new-proforma').addEventListener('click', () =>
+        openNewDoc('proforma'),
+      )
+
+      document.getElementById('btn-back').addEventListener('click', () => showScreen(screenHome))
+
+      document.getElementById('btn-catalogue').addEventListener('click', () => {
+        hideCatalogForm()
+        renderCatalog()
+        refreshDatalist()
+        showScreen(screenCatalog)
+      })
+
+      document.getElementById('btn-catalog-back').addEventListener('click', () => showScreen(screenHome))
+
+      function hideCatalogForm() {
+        catalogFormZone.hidden = true
+      }
+
+      document.getElementById('btn-catalog-add').addEventListener('click', () => {
+        catalogFormZone.hidden = false
+        document.getElementById('cat-name').value = ''
+        document.getElementById('cat-price').value = ''
+        document.getElementById('cat-stock').value = ''
+        setType(currentType)
+      })
+
+      function setType(type) {
+        currentType = type
+        document.querySelectorAll('.choice-btn').forEach((b) =>
+          b.classList.toggle('active', b.dataset.type === type),
+        )
+        catTypeBadge.textContent = type === 'produit' ? 'Produit' : 'Service'
+        document.getElementById('cat-field-stock').hidden = type !== 'produit'
+        document.getElementById('cat-field-unit').hidden = type !== 'service'
+      }
+
+      document.querySelectorAll('.choice-btn').forEach((btn) =>
+        btn.addEventListener('click', () => setType(btn.dataset.type)),
+      )
+
+      document.getElementById('cat-currency').addEventListener('change', (e) =>
+        syncCurrency(e.target.value, e.target),
+      )
+
+      document.getElementById('btn-catalog-save').addEventListener('click', () => {
+        const name = document.getElementById('cat-name').value.trim()
+        const price = parseNum(document.getElementById('cat-price').value)
+        if (!name) {
+          showToast('Donnez un nom à l’article.')
+          return
+        }
+        if (!(price > 0)) {
+          showToast('Le prix doit être supérieur à 0.')
+          return
+        }
+        const item = {
+          id: Date.now(),
+          type: currentType,
+          name,
+          price,
+          currency: document.getElementById('cat-currency').value,
+        }
+        if (currentType === 'produit') {
+          item.stock = document.getElementById('cat-stock').value.trim()
+        } else {
+          item.unit = document.getElementById('cat-unit').value
+        }
+        catalog.push(item)
+        persistCatalog()
+        renderCatalog()
+        refreshDatalist()
+        hideCatalogForm()
+      })
+
+      /* ---------- Écran aperçu + enregistrement ---------- */
+      const screenPreview = document.getElementById('screen-preview')
+
+      const COMPANY = {
+        name: 'HOT INK SARL',
+        rccm: 'CD/KNG/RCCM/25-B-01826',
+        idnat: '01-S9502-N60968B',
+        address: '190 Avenue Changalele / Lubumbashi / RDC',
+        phone: '243853377600',
+        termsTitle: 'Conditions et modalités de paiement',
+        termsText: 'Payment is due within 15 days',
+      }
+
+      function collectInvoice() {
+        const client = document.getElementById('client-name').value.trim()
+        const currency =
+          itemsWrap.querySelector('.currency-select')?.value || 'FC'
+        const items = []
+        itemsWrap.querySelectorAll('.item-row').forEach((row) => {
+          const name = row.querySelector('.inp-name').value.trim()
+          const qty = parseNum(row.querySelector('.inp-qty').value)
+          const price = parseNum(row.querySelector('.inp-price').value)
+          if (name && qty > 0 && price > 0) {
+            items.push({ name, qty, price })
+          }
+        })
+        return { client, currency, items }
+      }
+
+      function loadStore(key) {
+        try {
+          return JSON.parse(localStorage.getItem(key) || '[]')
+        } catch {
+          return []
+        }
+      }
+
+      function getInvoices() {
+        return loadStore('hotink_invoices')
+      }
+
+      /* ---------- Proformas (stockage séparé des factures) ---------- */
+      function getProformas() {
+        return loadStore('hotink_proformas')
+      }
+
+      /* ---------- Paramètres de l'entreprise ---------- */
+      const screenSettings = document.getElementById('screen-settings')
+
+      function getCompanySettings() {
+        const defaults = { ...COMPANY }
+        try {
+          const saved = JSON.parse(localStorage.getItem('hotink_settings') || '{}')
+          return { ...defaults, ...saved }
+        } catch {
+          return defaults
+        }
+      }
+
+      function fillSettingsForm() {
+        const s = getCompanySettings()
+        document.getElementById('set-name').value = s.name || ''
+        document.getElementById('set-rccm').value = s.rccm || ''
+        document.getElementById('set-idnat').value = s.idnat || ''
+        document.getElementById('set-address').value = s.address || ''
+        document.getElementById('set-phone').value = s.phone || ''
+        document.getElementById('set-terms-title').value = s.termsTitle || ''
+        document.getElementById('set-terms-text').value = s.termsText || ''
+        pendingLogo = s.logo || null
+        refreshLogoPreview(pendingLogo)
+      }
+
+      /* ---------- Logo ---------- */
+      let pendingLogo = null
+
+      function refreshLogoPreview(dataUrl) {
+        const img = document.getElementById('logo-preview')
+        const hint = document.getElementById('logo-hint')
+        const rm = document.getElementById('btn-logo-remove')
+        if (dataUrl) {
+          img.src = dataUrl
+          img.hidden = false
+          hint.hidden = true
+          rm.hidden = false
+        } else {
+          img.removeAttribute('src')
+          img.hidden = true
+          hint.hidden = false
+          rm.hidden = true
+        }
+      }
+
+      document.getElementById('btn-logo-pick').addEventListener('click', () =>
+        document.getElementById('logo-input').click(),
+      )
+
+      document.getElementById('logo-input').addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0]
+        if (!f) return
+        const reader = new FileReader()
+        reader.onload = () => {
+          const img = new Image()
+          img.onload = () => {
+            /* Réduction pour rester léger dans le navigateur */
+            const MAX = 320
+            const ratio = Math.min(1, MAX / Math.max(img.width, img.height))
+            const c = document.createElement('canvas')
+            c.width = Math.max(1, Math.round(img.width * ratio))
+            c.height = Math.max(1, Math.round(img.height * ratio))
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
+            pendingLogo = c.toDataURL('image/png')
+            refreshLogoPreview(pendingLogo)
+          }
+          img.src = reader.result
+        }
+        reader.readAsDataURL(f)
+        e.target.value = ''
+      })
+
+      document.getElementById('btn-logo-remove').addEventListener('click', () => {
+        pendingLogo = null
+        refreshLogoPreview(null)
+      })
+
+      /* Navbar : logo blanc si défini, sinon texte HotInk */
+      function refreshNavLogo() {
+        const s = getCompanySettings()
+        const img = document.getElementById('nav-logo')
+        const txt = document.getElementById('nav-brand-text')
+        if (s.logo) {
+          img.src = s.logo
+          img.hidden = false
+          txt.hidden = true
+        } else {
+          img.removeAttribute('src')
+          img.hidden = true
+          txt.hidden = false
+        }
+        refreshAppIcon()
+      }
+
+      /* ---------- Icône de l'app (écran d'accueil du téléphone) ----------
+         Carré orange + logo en inversion (noir↔blanc), comme la navbar.
+         Sans logo : « h » blanc, la lettre de marque des factures. */
+      function drawAppIcon(size) {
+        return new Promise((resolve) => {
+          const c = document.createElement('canvas')
+          c.width = size
+          c.height = size
+          const ctx = c.getContext('2d')
+          ctx.fillStyle = '#f97316'
+          ctx.fillRect(0, 0, size, size)
+
+          const finish = () => resolve(c.toDataURL('image/png'))
+          const logo = getCompanySettings().logo
+
+          if (!logo) {
+            ctx.fillStyle = '#ffffff'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.font = `800 ${Math.round(size * 0.6)}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif`
+            ctx.fillText('h', size / 2, size * 0.54)
+            finish()
+            return
+          }
+
+          const img = new Image()
+          img.onload = () => {
+            const zone = size * 0.72
+            const ratio = Math.min(zone / img.width, zone / img.height)
+            const w = img.width * ratio
+            const h = img.height * ratio
+            ctx.save()
+            ctx.filter = 'invert(1)'
+            ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h)
+            ctx.restore()
+            finish()
+          }
+          img.onerror = finish
+          img.src = logo
+        })
+      }
+
+      function setLink(id, rel, href, type) {
+        let l = document.getElementById(id)
+        if (!l) {
+          l = document.createElement('link')
+          l.id = id
+          l.rel = rel
+          document.head.appendChild(l)
+        }
+        if (type) l.type = type
+        l.href = href
+      }
+
+      async function refreshAppIcon() {
+        try {
+          const i512 = await drawAppIcon(512)
+          const i180 = await drawAppIcon(180)
+          setLink('app-favicon', 'icon', i512, 'image/png')
+          setLink('app-touch-icon', 'apple-touch-icon', i180)
+          /* Manifeste embarqué : permet « Ajouter à l'écran d'accueil » */
+          const manifest = {
+            name: 'HotInk',
+            short_name: 'HotInk',
+            start_url: '.',
+            display: 'standalone',
+            background_color: '#f97316',
+            theme_color: '#f97316',
+            icons: [
+              {
+                src: i512,
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'any maskable',
+              },
+            ],
+          }
+          setLink(
+            'app-manifest',
+            'manifest',
+            'data:application/manifest+json,' +
+              encodeURIComponent(JSON.stringify(manifest)),
+          )
+        } catch {
+          /* Icône non critique : on ignore les erreurs */
+        }
+      }
+
+      document.getElementById('btn-settings').addEventListener('click', () => {
+        fillSettingsForm()
+        showScreen(screenSettings)
+      })
+
+      document.getElementById('btn-settings-back').addEventListener('click', () =>
+        showScreen(screenHome),
+      )
+
+      document.getElementById('btn-settings-save').addEventListener('click', () => {
+        const name = document.getElementById('set-name').value.trim()
+        if (!name) {
+          showToast("Le nom de l'entreprise est obligatoire.")
+          return
+        }
+        localStorage.setItem(
+          'hotink_settings',
+          JSON.stringify({
+            name,
+            rccm: document.getElementById('set-rccm').value.trim(),
+            idnat: document.getElementById('set-idnat').value.trim(),
+            address: document.getElementById('set-address').value.trim(),
+            phone: document.getElementById('set-phone').value.trim(),
+            termsTitle:
+              document.getElementById('set-terms-title').value.trim() ||
+              COMPANY.termsTitle,
+            termsText:
+              document.getElementById('set-terms-text').value.trim() ||
+              COMPANY.termsText,
+            logo: pendingLogo ? pendingLogo : '',
+          }),
+        )
+        showToast('Paramètres enregistrés !')
+        refreshNavLogo()
+      })
+
+      /* Construit le document A4 (utilisé par l'aperçu ET l'historique) */
+      function invoiceDocHtml(inv, numStr, kind = 'facture') {
+        const total = inv.items.reduce((s, it) => s + it.qty * it.price, 0)
+        const S = getCompanySettings()
+        const isPro = kind === 'proforma'
+
+        let tableHtml
+        if (inv.items.length === 0) {
+          tableHtml =
+            '<div class="empty-hint">Aucune ligne valide (nom, quantité et prix requis).</div>'
+        } else {
+          const cells = []
+          inv.items.forEach((it) => {
+            cells.push(`<div class="inv-cell">${fmt(it.qty)}</div>`)
+            cells.push(`<div class="inv-cell">${it.name}</div>`)
+            cells.push(
+              `<div class="inv-cell inv-cell-pu">${fmt(it.price)} ${inv.currency}</div>`,
+            )
+          })
+          tableHtml = `
+            <div class="inv-grid">
+              <div class="inv-h">Quantite</div>
+              <div class="inv-h">Designation</div>
+              <div class="inv-h pu">Prix Unit.</div>
+              ${cells.join('')}
+            </div>`
+        }
+
+        return `
+          <div class="inv-num"><span class="inv-num-txt">${isPro ? 'Facture proforma' : 'Facture'} <span>h</span><span>${numStr}</span></span></div>
+          <div class="inv-doc">
+            <div class="inv-head">
+              <div>
+                <div class="inv-co-name">${escapeHtml(S.name)}</div>
+                <div class="inv-co-line">RCCM : ${escapeHtml(S.rccm)}</div>
+                <div class="inv-co-line">IDNAT : ${escapeHtml(S.idnat)}</div>
+                <div class="inv-co-line">${escapeHtml(S.address)}</div>
+                <div class="inv-co-line">${escapeHtml(S.phone)}</div>
+              </div>
+              ${S.logo ? `<img class="inv-logo" src="${S.logo}" alt="" />` : ''}
+            </div>
+            <div class="inv-meta-row">
+              <div class="inv-dest">
+                <div class="inv-dest-to">à</div>
+                <div class="inv-client">${escapeHtml(inv.client || 'Client non renseigné')}</div>
+              </div>
+              <div class="inv-date">Le ${inv.dateLabel}</div>
+            </div>
+            ${tableHtml}
+            <div class="inv-total"><span>Total</span><strong>${fmt(total)} ${inv.currency}</strong></div>
+            <div class="inv-terms">
+              <div class="inv-terms-title">${escapeHtml(S.termsTitle)}</div>
+              <div class="inv-terms-text">${escapeHtml(S.termsText)}</div>
+            </div>
+          </div>`
+      }
+
+      function showInvoiceDoc(inv, numStr, kind = 'facture') {
+        document.getElementById('a4-sheet').innerHTML = invoiceDocHtml(inv, numStr, kind)
+        pdfMeta.num = numStr
+        pdfMeta.client = inv.client || ''
+        pdfMeta.kind = kind
+        showScreen(screenPreview)
+        requestAnimationFrame(fitSheet)
+      }
+
+      /* ---------- Téléchargement PDF ---------- */
+      const pdfMeta = { num: '001', client: '', kind: 'facture' }
+
+      async function downloadInvoicePdf() {
+        if (typeof html2canvas === 'undefined' || !(window.jspdf && window.jspdf.jsPDF)) {
+          showToast('Connexion internet requise pour générer le PDF.')
+          return
+        }
+
+        /* On capture un CLONE hors écran, en flux normal :
+           la feuille à l'écran est en position absolue + échelle réduite,
+           ce qui produisait des PDF vides */
+        const sheet = document.getElementById('a4-sheet')
+        const holder = document.createElement('div')
+        holder.style.cssText =
+          'position:fixed;left:-20000px;top:0;width:794px;background:#ffffff;'
+        const clone = sheet.cloneNode(true)
+        clone.style.position = 'relative'
+        clone.style.top = 'auto'
+        clone.style.left = 'auto'
+        clone.style.transform = 'none'
+        clone.style.boxShadow = 'none'
+
+        /* ATTACHER D'ABORD : un élément hors du document mesure 0px */
+        holder.appendChild(clone)
+        document.body.appendChild(holder)
+
+        /* Une page A4 ≈ 1123px : on garde la pleine hauteur tant que le
+           contenu tient ; s'il déborde, la feuille grandit et sera découpée */
+        clone.style.height = 'auto'
+        if (clone.offsetHeight <= 1123) clone.style.height = '1123px'
+        const totalH = clone.offsetHeight
+
+        const clientSlug = pdfMeta.client
+          .trim()
+          .replace(/[^a-z0-9]+/gi, '-')
+          .replace(/^-+|-+$/g, '')
+          .toLowerCase()
+
+        try {
+          const canvas = await html2canvas(clone, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+          })
+
+          const { jsPDF } = window.jspdf
+          const pdf = new jsPDF({
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait',
+            compress: true,
+          })
+
+          /* 794px ↔ 210mm → une page fait ~1123px de haut */
+          const pxPerMm = 794 / 210
+          const sliceCssH = 297 * pxPerMm
+          const s = canvas.width / 794
+
+          let y = 0
+          while (y < totalH - 0.5) {
+            const hSlice = Math.min(sliceCssH, totalH - y)
+            if (y > 0) pdf.addPage()
+
+            const c = document.createElement('canvas')
+            c.width = canvas.width
+            c.height = Math.max(1, Math.round(hSlice * s))
+            c.getContext('2d').drawImage(
+              canvas,
+              0,
+              Math.round(y * s),
+              canvas.width,
+              Math.min(c.height, canvas.height - Math.round(y * s)),
+              0,
+              0,
+              c.width,
+              c.height,
+            )
+            pdf.addImage(c.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, (hSlice * 210) / 794)
+            y += sliceCssH
+          }
+
+          const base = pdfMeta.kind === 'proforma' ? 'facture-proforma-h' : 'facture-h'
+          pdf.save(`${base}${pdfMeta.num}${clientSlug ? '-' + clientSlug : ''}.pdf`)
+          showToast('PDF téléchargé !')
+        } catch {
+          showToast('Impossible de générer le PDF, réessayez.')
+        } finally {
+          holder.remove()
+        }
+      }
+
+      document.getElementById('btn-download-pdf').addEventListener('click', downloadInvoicePdf)
+
+      function renderPreview() {
+        const inv = collectInvoice()
+        const numStr = String(
+          nextDocSeq(docMode === 'proforma' ? getProformas() : getInvoices()),
+        ).padStart(3, '0')
+        showInvoiceDoc(
+          {
+            client: inv.client,
+            currency: inv.currency,
+            items: inv.items,
+            dateLabel: getInvoiceDate().toLocaleDateString('fr-FR'),
+          },
+          numStr,
+          docMode,
+        )
+      }
+
+      /* Retour de l'aperçu : formulaire ou historique selon l'origine */
+      let previewReturn = screenInvoice
+
+      document.getElementById('btn-preview').addEventListener('click', () => {
+        previewReturn = screenInvoice
+        renderPreview()
+      })
+
+      /* Ajuste l'échelle de la feuille A4 à la largeur de l'écran */
+      function fitSheet() {
+        const wrap = document.getElementById('sheet-wrap')
+        if (!wrap || wrap.offsetParent === null) return
+        const scale = Math.min(1, wrap.clientWidth / 794)
+        wrap.style.setProperty('--s', String(scale))
+        wrap.style.height = `${Math.round(1123 * scale)}px`
+      }
+
+      window.addEventListener('resize', fitSheet)
+
+      document.getElementById('btn-preview-back').addEventListener('click', () =>
+        showScreen(previewReturn),
+      )
+
+      /* Prochain numéro = max existant + 1 : supprimer un document
+         ne libère plus un numéro déjà utilisé */
+      function nextDocSeq(list) {
+        return list.reduce((m, r) => {
+          const n = parseInt(String(r.number).replace(/\D/g, ''), 10)
+          return isNaN(n) ? m : Math.max(m, n)
+        }, 0) + 1
+      }
+
+      function nextInvoiceNumber(invoices) {
+        return `FAC-${String(nextDocSeq(invoices)).padStart(3, '0')}`
+      }
+
+      function nextProformaNumber(proformas) {
+        return `PRO-${String(nextDocSeq(proformas)).padStart(3, '0')}`
+      }
+
+      document.getElementById('btn-save-invoice').addEventListener('click', () => {
+        const inv = collectInvoice()
+        if (!inv.client) {
+          showToast('Indiquez le nom du client.')
+          return
+        }
+        if (inv.items.length === 0) {
+          showToast('Ajoutez au moins une ligne valide (nom, quantité et prix).')
+          return
+        }
+        const isPro = docMode === 'proforma'
+        if (!isPro && !applyStockForInvoice(inv.items)) return
+        const list = isPro ? getProformas() : getInvoices()
+        const record = {
+          id: Date.now(),
+          number: isPro ? nextProformaNumber(list) : nextInvoiceNumber(list),
+          kind: docMode,
+          ...inv,
+          total: inv.items.reduce((s, it) => s + it.qty * it.price, 0),
+          date: getInvoiceDate().toISOString(),
+        }
+        list.unshift(record)
+        localStorage.setItem(
+          isPro ? 'hotink_proformas' : 'hotink_invoices',
+          JSON.stringify(list),
+        )
+
+        /* Réinitialisation du formulaire */
+        document.getElementById('client-name').value = ''
+        itemsWrap.innerHTML = ''
+        resetInvoiceDate()
+        addItemRow()
+        recalcTotal()
+
+        showScreen(screenHome)
+        showToast(`${isPro ? 'Proforma' : 'Facture'} ${record.number} enregistrée !`)
+      })
+
+      function showScreen(target) {
+        ;[
+          screenHome,
+          screenInvoice,
+          screenCatalog,
+          screenPreview,
+          screenHistory,
+          screenPayments,
+          screenStats,
+          screenClients,
+          screenSettings,
+        ].forEach((s) => (s.hidden = s !== target))
+      }
+
+      /* ---------- Historique des factures ---------- */
+      const screenHistory = document.getElementById('screen-history')
+
+      document.getElementById('btn-history').addEventListener('click', () => {
+        renderHistory()
+        showScreen(screenHistory)
+      })
+
+      document.getElementById('btn-history-back').addEventListener('click', () =>
+        showScreen(screenHome),
+      )
+
+      function renderHistory() {
+        /* Factures et proformas réunies, plus récentes en premier */
+        const docs = [...getInvoices(), ...getProformas()].sort((a, b) =>
+          String(b.date).localeCompare(String(a.date)),
+        )
+        const wrap = document.getElementById('history-list')
+        if (docs.length === 0) {
+          wrap.innerHTML = '<div class="empty-hint">Aucun document enregistré.</div>'
+          return
+        }
+        wrap.innerHTML = ''
+        docs.forEach((rec) => {
+          const div = document.createElement('div')
+          div.className = 'hist-item'
+          const dateLabel = new Date(rec.date).toLocaleDateString('fr-FR')
+          const st = rec.kind === 'proforma' ? null : payStatus(rec)
+          div.innerHTML = `
+            <div>
+              <span class="hist-num">${rec.number}</span>
+              ${st ? `<span class="pay-chip ${st}">${PAY_LABELS[st]}</span>` : ''}
+              <div class="hist-client">${escapeHtml(rec.client)}</div>
+              <div class="hist-date">${dateLabel} · ${rec.items.length} article(s)</div>
+            </div>
+            <div class="hist-amt">${fmt(rec.total)} ${rec.currency}</div>`
+          div.addEventListener('click', () => {
+            previewReturn = screenHistory
+            const numStr = String(rec.number).replace(/^(FAC|PRO)-/, '')
+            showInvoiceDoc(
+              {
+                client: rec.client,
+                currency: rec.currency,
+                items: rec.items,
+                dateLabel,
+              },
+              numStr,
+              rec.kind === 'proforma' ? 'proforma' : 'facture',
+            )
+          })
+          const del = document.createElement('button')
+          del.type = 'button'
+          del.className = 'hist-remove'
+          del.textContent = 'X'
+          del.title = 'Supprimer cette facture'
+          del.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            const yes = await showConfirm({
+              title: 'Supprimer la facture',
+              message: `Supprimer définitivement la facture ${rec.number} ? Cette action est irréversible.`,
+              okText: 'Supprimer',
+              danger: true,
+            })
+            if (yes) {
+              const key = rec.kind === 'proforma' ? 'hotink_proformas' : 'hotink_invoices'
+              localStorage.setItem(
+                key,
+                JSON.stringify(loadStore(key).filter((r) => r.id !== rec.id)),
+              )
+              renderHistory()
+              showToast(`${rec.number} supprimé.`)
+            }
+          })
+          div.appendChild(del)
+
+          if (rec.kind === 'proforma') {
+            div.style.paddingRight = '64px'
+            const conv = document.createElement('button')
+            conv.type = 'button'
+            conv.className = 'hist-convert'
+            conv.textContent = '→'
+            conv.title = 'Convertir en facture'
+            conv.addEventListener('click', async (e) => {
+              e.stopPropagation()
+              const invoices = getInvoices()
+              const num = nextInvoiceNumber(invoices)
+              const yes = await showConfirm({
+                title: 'Convertir en facture',
+                message: `Créer la ${num} à partir de la proforma ${rec.number} ?`,
+                okText: 'Convertir',
+              })
+              if (!yes) return
+              /* Le stock est contrôlé/décrémenté comme pour une facture normale */
+              if (!applyStockForInvoice(rec.items)) return
+              invoices.unshift({
+                id: Date.now(),
+                number: num,
+                kind: 'facture',
+                client: rec.client,
+                currency: rec.currency,
+                items: rec.items.map((it) => ({ ...it })),
+                total: rec.total,
+                date: new Date().toISOString(),
+              })
+              persistInvoices(invoices)
+              renderHistory()
+              showToast(`Proforma ${rec.number} convertie en ${num}.`)
+            })
+            div.appendChild(conv)
+          }
+
+          wrap.appendChild(div)
+        })
+      }
+
+      /* ---------- Suivi des paiements ---------- */
+      const screenPayments = document.getElementById('screen-payments')
+
+      function persistInvoices(list) {
+        localStorage.setItem('hotink_invoices', JSON.stringify(list))
+      }
+
+      function paidOf(rec) {
+        return (rec.payments || []).reduce((s, p) => s + p.amount, 0)
+      }
+
+      function payStatus(rec) {
+        const eps = 0.005
+        const paid = paidOf(rec)
+        if (paid >= rec.total - eps) return 'paid'
+        if (paid > eps) return 'partial'
+        return 'unpaid'
+      }
+
+      const PAY_LABELS = { unpaid: 'Impayée', partial: 'Partielle', paid: 'Payée' }
+
+      let currentPayFilter = 'all'
+      let selectedPayId = null
+
+      document.getElementById('btn-payments').addEventListener('click', () => {
+        setPayFilter('all')
+        showScreen(screenPayments)
+      })
+
+      document.getElementById('btn-payments-back').addEventListener('click', () =>
+        showScreen(screenHome),
+      )
+
+      function setPayFilter(f) {
+        currentPayFilter = f
+        document.querySelectorAll('#screen-payments .filter-btn').forEach((b) =>
+          b.classList.toggle('active', b.dataset.filter === f),
+        )
+        selectedPayId = null
+        document.getElementById('payment-panel').hidden = true
+        renderPayments()
+      }
+
+      document.querySelectorAll('#screen-payments .filter-btn').forEach((b) =>
+        b.addEventListener('click', () => setPayFilter(b.dataset.filter)),
+      )
+
+      function renderPayments() {
+        const wrap = document.getElementById('payments-list')
+        const invoices = [...getInvoices()].sort((a, b) =>
+          String(b.date).localeCompare(String(a.date)),
+        )
+        const shown = invoices.filter(
+          (r) => currentPayFilter === 'all' || payStatus(r) === currentPayFilter,
+        )
+        if (shown.length === 0) {
+          wrap.innerHTML =
+            '<div class="empty-hint">Aucune facture dans cette catégorie.</div>'
+          return
+        }
+        wrap.innerHTML = ''
+        shown.forEach((rec) => {
+          const st = payStatus(rec)
+          const reste = Math.max(0, rec.total - paidOf(rec))
+          const dateLabel = new Date(rec.date).toLocaleDateString('fr-FR')
+          const div = document.createElement('div')
+          div.className = 'hist-item'
+          div.innerHTML = `
+            <div>
+              <span class="hist-num">${rec.number}</span>
+              <span class="pay-chip ${st}">${PAY_LABELS[st]}</span>
+              <div class="hist-client">${escapeHtml(rec.client)}</div>
+              <div class="hist-date">${dateLabel}</div>
+            </div>
+            <div class="hist-amt">${fmt(reste)} ${rec.currency}</div>`
+          div.addEventListener('click', () => {
+            selectedPayId = rec.id
+            renderPayPanel()
+          })
+          wrap.appendChild(div)
+        })
+      }
+
+      function renderPayPanel() {
+        const panel = document.getElementById('payment-panel')
+        const rec = getInvoices().find((r) => r.id === selectedPayId)
+        if (!rec) {
+          panel.hidden = true
+          return
+        }
+        const paid = paidOf(rec)
+        const st = payStatus(rec)
+        const reste = Math.max(0, rec.total - paid)
+        const entries = (rec.payments || [])
+          .map(
+            (p, i) => `
+            <div class="pay-entry">
+              <span>${new Date(p.date).toLocaleDateString('fr-FR')}</span>
+              <strong>${fmt(p.amount)} ${rec.currency}</strong>
+              <button type="button" class="item-remove" data-i="${i}" title="Supprimer ce paiement">X</button>
+            </div>`,
+          )
+          .join('')
+        panel.innerHTML = `
+          <div class="panel-head">
+            <span class="hist-num">${rec.number}</span>
+            <span class="pay-chip ${st}">${PAY_LABELS[st]}</span>
+          </div>
+          <div class="panel-lines">
+            <div><span>Total</span><strong>${fmt(rec.total)} ${rec.currency}</strong></div>
+            <div><span>Déjà payé</span><strong>${fmt(paid)} ${rec.currency}</strong></div>
+            <div><span>Reste à payer</span><strong>${fmt(reste)} ${rec.currency}</strong></div>
+          </div>
+          <div class="field">
+            <label for="pay-amount">Nouveau paiement (${rec.currency})</label>
+            <input type="text" inputmode="decimal" id="pay-amount" placeholder="0,00"
+              value="${reste > 0 ? String(reste).replace('.', ',') : ''}" />
+          </div>
+          <button id="btn-add-payment" class="btn-save" type="button">Enregistrer le paiement</button>
+          ${entries ? '<div class="section-label">Paiements effectués</div>' + entries : ''}`
+        panel.hidden = false
+
+        panel.querySelector('#btn-add-payment').addEventListener('click', () => {
+          const amount = parseNum(panel.querySelector('#pay-amount').value)
+          if (!(amount > 0)) {
+            showToast('Indiquez un montant supérieur à 0.')
+            return
+          }
+          if (amount > Math.max(0, rec.total - paidOf(rec)) + 0.005) {
+            showToast('Le montant dépasse le reste à payer.')
+            return
+          }
+          const list = getInvoices()
+          const target = list.find((r) => r.id === rec.id)
+          target.payments = target.payments || []
+          target.payments.push({ date: new Date().toISOString(), amount })
+          persistInvoices(list)
+          showToast(
+            payStatus(target) === 'paid'
+              ? `Facture ${target.number} soldée !`
+              : `Paiement de ${fmt(amount)} ${target.currency} enregistré.`,
+          )
+          renderPayments()
+          renderPayPanel()
+        })
+
+        panel.querySelectorAll('.item-remove').forEach((btn) =>
+          btn.addEventListener('click', async () => {
+            const i = Number(btn.dataset.i)
+            const yes = await showConfirm({
+              title: 'Supprimer le paiement',
+              message: `Retirer le paiement du ${new Date(
+                rec.payments[i].date,
+              ).toLocaleDateString('fr-FR')} ?`,
+              okText: 'Supprimer',
+              danger: true,
+            })
+            if (!yes) return
+            const list = getInvoices()
+            const target = list.find((r) => r.id === rec.id)
+            target.payments.splice(i, 1)
+            persistInvoices(list)
+            renderPayments()
+            renderPayPanel()
+          }),
+        )
+      }
+
+      /* ---------- Statistiques ---------- */
+      const screenStats = document.getElementById('screen-stats')
+      let currentStatsPeriod = 'month'
+
+      document.getElementById('btn-stats').addEventListener('click', () => {
+        renderStats()
+        showScreen(screenStats)
+      })
+
+      document.getElementById('btn-stats-back').addEventListener('click', () =>
+        showScreen(screenHome),
+      )
+
+      document.querySelectorAll('#screen-stats .filter-btn').forEach((b) =>
+        b.addEventListener('click', () => {
+          currentStatsPeriod = b.dataset.period
+          document
+            .querySelectorAll('#screen-stats .filter-btn')
+            .forEach((x) => x.classList.toggle('active', x === b))
+          renderStats()
+        }),
+      )
+
+      function statWindow(period) {
+        const n = new Date()
+        const y = n.getFullYear()
+        const m = n.getMonth()
+        if (period === 'month')
+          return { start: new Date(y, m, 1), end: new Date(y, m + 1, 1) }
+        if (period === 'lastmonth')
+          return { start: new Date(y, m - 1, 1), end: new Date(y, m, 1) }
+        if (period === 'year')
+          return { start: new Date(y, 0, 1), end: new Date(y + 1, 0, 1) }
+        return { start: null, end: null }
+      }
+
+      function inRange(iso, w) {
+        if (!w.start) return true
+        const d = new Date(iso)
+        return d >= w.start && d < w.end
+      }
+
+      function renderStats() {
+        const w = statWindow(currentStatsPeriod)
+        const invs = getInvoices().filter((r) => inRange(r.date, w))
+        const proCount = getProformas().filter((r) => inRange(r.date, w)).length
+        const wrap = document.getElementById('stats-content')
+
+        if (invs.length === 0 && proCount === 0) {
+          wrap.innerHTML =
+            '<div class="empty-hint">Aucun document sur la période.</div>'
+          return
+        }
+
+        /* Agrégation par devise : on ne mélange jamais FC, $ et € */
+        const byCur = {}
+        invs.forEach((r) => {
+          const b =
+            byCur[r.currency] ||
+            (byCur[r.currency] = { factured: 0, paid: 0, count: 0, clients: {} })
+          b.factured += r.total
+          b.paid += paidOf(r)
+          b.count += 1
+          const c = b.clients[r.client] || (b.clients[r.client] = { total: 0, n: 0 })
+          c.total += r.total
+          c.n += 1
+        })
+
+        const curBlocks = Object.keys(byCur)
+          .map((cur) => {
+            const b = byCur[cur]
+            const attente = Math.max(0, b.factured - b.paid)
+            const moyen = b.count ? b.factured / b.count : 0
+            const top = Object.keys(b.clients)
+              .map((name) => ({ name, ...b.clients[name] }))
+              .sort((a, z) => z.total - a.total)
+              .slice(0, 5)
+              .map(
+                (c, i) =>
+                  `<div class="stat-line"><span>${i + 1}. ${escapeHtml(c.name)}</span><strong>${fmt(c.total)} ${cur}</strong></div>`,
+              )
+              .join('')
+            return `
+            <div class="stat-block">
+              <div class="stat-cur">Devise ${cur}</div>
+              <div class="stat-line"><span>Factures émises</span><strong>${b.count}</strong></div>
+              <div class="stat-line"><span>Facturé</span><strong>${fmt(b.factured)} ${cur}</strong></div>
+              <div class="stat-line"><span>Encaissé</span><strong>${fmt(b.paid)} ${cur}</strong></div>
+              <div class="stat-line"><span>En attente</span><strong>${fmt(attente)} ${cur}</strong></div>
+              <div class="stat-line"><span>Ticket moyen</span><strong>${moyen ? fmt(moyen) + ' ' + cur : '—'}</strong></div>
+              ${top ? '<div class="section-label">Top clients</div>' + top : ''}
+            </div>`
+          })
+          .join('')
+
+        wrap.innerHTML = `
+          ${proCount ? `<div class="empty-hint">${proCount} proforma(s) sur la période (hors montants)</div>` : ''}
+          ${curBlocks}`
+      }
+
+      /* ---------- Clients ---------- */
+      const screenClients = document.getElementById('screen-clients')
+      const clientFormZone = document.getElementById('client-form-zone')
+      let editingClientId = null
+
+      function getClients() {
+        return loadStore('hotink_clients')
+      }
+
+      function refreshClientDatalist() {
+        document.getElementById('dl-clients').innerHTML = getClients()
+          .map((c) => `<option value="${escapeHtml(c.name)}">`)
+          .join('')
+      }
+
+      document.getElementById('btn-clients').addEventListener('click', () => {
+        hideClientForm()
+        renderClients()
+        showScreen(screenClients)
+      })
+
+      document.getElementById('btn-clients-back').addEventListener('click', () =>
+        showScreen(screenHome),
+      )
+
+      function hideClientForm() {
+        editingClientId = null
+        clientFormZone.hidden = true
+        document.getElementById('client-form-name').value = ''
+        document.getElementById('client-form-phone').value = ''
+      }
+
+      document.getElementById('btn-client-add').addEventListener('click', () => {
+        hideClientForm()
+        clientFormZone.hidden = false
+        document.getElementById('client-form-name').focus()
+      })
+
+      function renderClients() {
+        const wrap = document.getElementById('clients-list')
+        const clients = [...getClients()].sort((a, b) =>
+          a.name.localeCompare(b.name, 'fr'),
+        )
+        if (clients.length === 0) {
+          wrap.innerHTML =
+            '<div class="empty-hint">Aucun client enregistré.</div>'
+          return
+        }
+        wrap.innerHTML = ''
+        clients.forEach((c) => {
+          const div = document.createElement('div')
+          div.className = 'hist-item'
+          const infos = [c.phone].filter(Boolean).map(escapeHtml)
+          div.innerHTML = `
+            <div>
+              <div class="hist-client">${escapeHtml(c.name)}</div>
+              <div class="hist-date">${infos.length ? infos.join(' · ') : '—'}</div>
+            </div>`
+          /* Clic sur la fiche : modification */
+          div.addEventListener('click', () => {
+            editingClientId = c.id
+            document.getElementById('client-form-name').value = c.name
+            document.getElementById('client-form-phone').value = c.phone || ''
+            clientFormZone.hidden = false
+            document.getElementById('client-form-name').focus()
+          })
+          const del = document.createElement('button')
+          del.type = 'button'
+          del.className = 'hist-remove'
+          del.textContent = 'X'
+          del.title = 'Supprimer ce client'
+          del.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            const yes = await showConfirm({
+              title: 'Supprimer le client',
+              message: `Supprimer définitivement ${c.name} ? Ses factures restent intactes.`,
+              okText: 'Supprimer',
+              danger: true,
+            })
+            if (!yes) return
+            localStorage.setItem(
+              'hotink_clients',
+              JSON.stringify(getClients().filter((r) => r.id !== c.id)),
+            )
+            if (editingClientId === c.id) hideClientForm()
+            renderClients()
+            refreshClientDatalist()
+            showToast(`${c.name} supprimé.`)
+          })
+          div.appendChild(del)
+          wrap.appendChild(div)
+        })
+      }
+
+      document.getElementById('btn-client-save').addEventListener('click', () => {
+        const name = document.getElementById('client-form-name').value.trim()
+        if (!name) {
+          showToast('Le nom du client est obligatoire.')
+          return
+        }
+        const phone = document.getElementById('client-form-phone').value.trim()
+        const clients = getClients()
+        if (editingClientId != null) {
+          const target = clients.find((r) => r.id === editingClientId)
+          if (target) Object.assign(target, { name, phone, address: '' })
+        } else {
+          /* Même nom : on met à jour la fiche existante au lieu de doubler */
+          const dup = clients.find(
+            (r) => r.name.toLowerCase() === name.toLowerCase(),
+          )
+          if (dup) Object.assign(dup, { name, phone, address: '' })
+          else clients.push({ id: Date.now(), name, phone })
+        }
+        localStorage.setItem('hotink_clients', JSON.stringify(clients))
+        hideClientForm()
+        renderClients()
+        refreshClientDatalist()
+        showToast('Client enregistré !')
+      })
+
+      /* Chargement initial des suggestions du catalogue */
+      refreshDatalist()
+      refreshClientDatalist()
+      refreshNavLogo()
+    </script>
+  </body>
+</html>
