@@ -242,37 +242,49 @@
 
       .row-2 {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.6fr 1fr;
         gap: 10px;
       }
 
-      /* Prix + devise */
+      /* Prix + devise intégrée au champ */
       .price-wrap {
         display: flex;
-        gap: 8px;
-      }
-
-      .price-wrap .inp-price {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .currency-select {
-        width: 78px;
-        padding: 12px 8px;
+        align-items: stretch;
         border: 1px solid #e2e2e8;
         border-radius: 12px;
         background: #ffffff;
+        transition: border 0.15s;
+      }
+
+      .price-wrap:focus-within {
+        border-color: #f97316;
+      }
+
+      .price-wrap .inp-price,
+      .price-wrap input {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 12px 0 12px 14px;
+        font-size: 15px;
+        font-family: inherit;
+      }
+
+      .currency-select {
+        width: auto;
+        min-width: 48px;
+        padding: 12px 6px;
+        border: none;
+        background: transparent;
         font-size: 14px;
         font-weight: 600;
         font-family: inherit;
         color: #374151;
         outline: none;
         cursor: pointer;
-      }
-
-      .currency-select:focus {
-        border-color: #f97316;
       }
 
       .add-btn {
@@ -692,6 +704,42 @@
         display: none;
       }
 
+      /* Écran de connexion : fond orange plein, pas de flou */
+      #auth-overlay {
+        background: #f97316;
+        backdrop-filter: none;
+      }
+
+      /* Mot de passe : bouton œil afficher / masquer */
+      .pass-wrap {
+        position: relative;
+      }
+
+      .pass-wrap input {
+        padding-right: 48px;
+      }
+
+      .pass-eye {
+        position: absolute;
+        top: 50%;
+        right: 7px;
+        transform: translateY(-50%);
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #9ca3af;
+        cursor: pointer;
+      }
+
+      .pass-eye:hover {
+        color: #374151;
+      }
+
       .modal {
         width: 100%;
         max-width: 330px;
@@ -1046,7 +1094,19 @@
         </div>
         <div class="field">
           <label for="auth-pass">Mot de passe</label>
-          <input type="password" id="auth-pass" autocomplete="current-password" />
+          <div class="pass-wrap">
+            <input type="password" id="auth-pass" autocomplete="current-password" />
+            <button type="button" id="btn-pass-eye" class="pass-eye" aria-label="Afficher le mot de passe">
+              <svg class="eye-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg class="eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-2.72 2.02a9.94 9.94 0 0 1-5.12 1.79" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            </button>
+          </div>
         </div>
         <div id="auth-error" class="empty-hint" hidden></div>
         <button id="btn-login" class="btn-save" type="button">Se connecter</button>
@@ -1330,6 +1390,20 @@
           </div>
 
           <div id="payments-list"></div>
+        </section>
+
+        <!-- ÉCRAN DÉTAIL PAIEMENTS -->
+        <section id="screen-payment-detail" hidden>
+          <div class="screen-head">
+            <button id="btn-payment-detail-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title" id="payment-detail-title">Paiements</h2>
+          </div>
+
           <div id="payment-panel" class="detail-panel" hidden></div>
         </section>
 
@@ -1369,7 +1443,23 @@
 
           <button id="btn-client-add" class="add-btn" type="button">+ Nouveau client</button>
 
-          <div id="client-form-zone" hidden style="margin-top: 16px">
+          <div class="section-label">Clients enregistrés</div>
+          <div id="clients-list"></div>
+        </section>
+
+        <!-- ÉCRAN CLIENT (création / modification) -->
+        <section id="screen-client-edit" hidden>
+          <div class="screen-head">
+            <button id="btn-client-edit-back" class="back-btn" type="button" aria-label="Retour">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h2 class="screen-title" id="client-edit-title">Modifier le client</h2>
+          </div>
+
+          <div id="client-form-zone">
             <div class="field">
               <label for="client-form-name">Nom</label>
               <input type="text" id="client-form-name" placeholder="Nom du client…" />
@@ -1380,9 +1470,6 @@
             </div>
             <button id="btn-client-save" class="btn-save" type="button">Enregistrer le client</button>
           </div>
-
-          <div class="section-label">Clients enregistrés</div>
-          <div id="clients-list"></div>
         </section>
 
         <!-- ÉCRAN PARAMÈTRE -->
@@ -1427,13 +1514,8 @@
           <div class="section-label">Conditions de paiement</div>
 
           <div class="field">
-            <label for="set-terms-title">Titre des conditions</label>
-            <input type="text" id="set-terms-title" placeholder="Conditions et modalités de paiement" />
-          </div>
-
-          <div class="field">
-            <label for="set-terms-text">Texte des conditions</label>
-            <input type="text" id="set-terms-text" placeholder="Payment is due within 15 days" />
+            <label for="set-terms-days">Délai de paiement (jours)</label>
+            <input type="number" id="set-terms-days" min="1" max="365" inputmode="numeric" />
           </div>
 
           <div class="field">
@@ -1842,7 +1924,12 @@
         address: '190 Avenue Changalele / Lubumbashi / RDC',
         phone: '243853377600',
         termsTitle: 'Conditions et modalités de paiement',
-        termsText: 'Payment is due within 15 days',
+        termsDays: 15,
+      }
+
+      function termsTextFor(days) {
+        const n = Number(days) || COMPANY.termsDays
+        return `Payment is due within ${n} day${n === 1 ? '' : 's'}`
       }
 
       function collectInvoice() {
@@ -1898,8 +1985,12 @@
         document.getElementById('set-idnat').value = s.idnat || ''
         document.getElementById('set-address').value = s.address || ''
         document.getElementById('set-phone').value = s.phone || ''
-        document.getElementById('set-terms-title').value = s.termsTitle || ''
-        document.getElementById('set-terms-text').value = s.termsText || ''
+        let termsDays = s.termsDays
+        if (!Number.isFinite(Number(termsDays))) {
+          const m = String(s.termsText || '').match(/(\d+)/)
+          termsDays = m ? parseInt(m[1], 10) : COMPANY.termsDays
+        }
+        document.getElementById('set-terms-days').value = termsDays
         pendingLogo = s.logo || null
         refreshLogoPreview(pendingLogo)
       }
@@ -1974,7 +2065,7 @@
       }
 
       /* ---------- Icône de l'app (écran d'accueil du téléphone) ----------
-         Carré orange + logo en inversion (noir↔blanc), comme la navbar.
+         Carré orange + logo en blanc uni, comme la navbar.
          Sans logo : « h » blanc, la lettre de marque des factures. */
       function drawAppIcon(size) {
         return new Promise((resolve) => {
@@ -2004,10 +2095,17 @@
             const ratio = Math.min(zone / img.width, zone / img.height)
             const w = img.width * ratio
             const h = img.height * ratio
-            ctx.save()
-            ctx.filter = 'invert(1)'
-            ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h)
-            ctx.restore()
+            /* Logo aplati en blanc pur : la forme vient de la transparence,
+               toutes les couleurs deviennent blanches sur fond orange. */
+            const off = document.createElement('canvas')
+            off.width = size
+            off.height = size
+            const octx = off.getContext('2d')
+            octx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h)
+            octx.globalCompositeOperation = 'source-in'
+            octx.fillStyle = '#ffffff'
+            octx.fillRect(0, 0, size, size)
+            ctx.drawImage(off, 0, 0)
             finish()
           }
           img.onerror = finish
@@ -2076,18 +2174,17 @@
           showToast("Le nom de l'entreprise est obligatoire.")
           return
         }
+        const rawDays = parseInt(document.getElementById('set-terms-days').value, 10)
+        const termsDays = Number.isFinite(rawDays) && rawDays > 0 ? rawDays : COMPANY.termsDays
         dbSave('hotink_settings', {
           name,
           rccm: document.getElementById('set-rccm').value.trim(),
           idnat: document.getElementById('set-idnat').value.trim(),
           address: document.getElementById('set-address').value.trim(),
           phone: document.getElementById('set-phone').value.trim(),
-          termsTitle:
-            document.getElementById('set-terms-title').value.trim() ||
-            COMPANY.termsTitle,
-          termsText:
-            document.getElementById('set-terms-text').value.trim() ||
-            COMPANY.termsText,
+          termsTitle: COMPANY.termsTitle,
+          termsDays,
+          termsText: termsTextFor(termsDays),
           logo: pendingLogo ? pendingLogo : '',
         })
         showToast('Paramètres enregistrés !')
@@ -2356,6 +2453,8 @@
           screenPayments,
           screenStats,
           screenClients,
+          screenClientEdit,
+          screenPaymentDetail,
           screenSettings,
         ].forEach((s) => (s.hidden = s !== target))
       }
@@ -2474,6 +2573,7 @@
 
       /* ---------- Suivi des paiements ---------- */
       const screenPayments = document.getElementById('screen-payments')
+      const screenPaymentDetail = document.getElementById('screen-payment-detail')
 
       function persistInvoices(list) {
         dbSave('hotink_invoices', list)
@@ -2503,6 +2603,10 @@
 
       document.getElementById('btn-payments-back').addEventListener('click', () =>
         showScreen(screenHome),
+      )
+
+      document.getElementById('btn-payment-detail-back').addEventListener('click', () =>
+        showScreen(screenPayments),
       )
 
       function setPayFilter(f) {
@@ -2592,7 +2696,9 @@
           </div>
           <button id="btn-add-payment" class="btn-save" type="button">Enregistrer le paiement</button>
           ${entries ? '<div class="section-label">Paiements effectués</div>' + entries : ''}`
+        document.getElementById('payment-detail-title').textContent = rec.number
         panel.hidden = false
+        showScreen(screenPaymentDetail)
 
         panel.querySelector('#btn-add-payment').addEventListener('click', () => {
           const amount = parseNum(panel.querySelector('#pay-amount').value)
@@ -2742,6 +2848,7 @@
 
       /* ---------- Clients ---------- */
       const screenClients = document.getElementById('screen-clients')
+      const screenClientEdit = document.getElementById('screen-client-edit')
       const clientFormZone = document.getElementById('client-form-zone')
       let editingClientId = null
 
@@ -2765,6 +2872,12 @@
         showScreen(screenHome),
       )
 
+      document.getElementById('btn-client-edit-back').addEventListener('click', () => {
+        hideClientForm()
+        renderClients()
+        showScreen(screenClients)
+      })
+
       function hideClientForm() {
         editingClientId = null
         clientFormZone.hidden = true
@@ -2775,6 +2888,8 @@
       document.getElementById('btn-client-add').addEventListener('click', () => {
         hideClientForm()
         clientFormZone.hidden = false
+        document.getElementById('client-edit-title').textContent = 'Nouveau client'
+        showScreen(screenClientEdit)
         document.getElementById('client-form-name').focus()
       })
 
@@ -2804,6 +2919,8 @@
             document.getElementById('client-form-name').value = c.name
             document.getElementById('client-form-phone').value = c.phone || ''
             clientFormZone.hidden = false
+            document.getElementById('client-edit-title').textContent = 'Modifier le client'
+            showScreen(screenClientEdit)
             document.getElementById('client-form-name').focus()
           })
           const del = document.createElement('button')
@@ -2854,6 +2971,7 @@
         hideClientForm()
         renderClients()
         refreshClientDatalist()
+        showScreen(screenClients)
         showToast('Client enregistré !')
       })
 
@@ -2954,6 +3072,18 @@
         document.getElementById('btn-login').addEventListener('click', doLogin)
         passEl.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') doLogin()
+        })
+
+        const eyeBtn = document.getElementById('btn-pass-eye')
+        eyeBtn.addEventListener('click', () => {
+          const show = passEl.type === 'password'
+          passEl.type = show ? 'text' : 'password'
+          eyeBtn.querySelector('.eye-on').hidden = !show
+          eyeBtn.querySelector('.eye-off').hidden = show
+          eyeBtn.setAttribute(
+            'aria-label',
+            show ? 'Masquer le mot de passe' : 'Afficher le mot de passe',
+          )
         })
 
         document.getElementById('btn-logout').addEventListener('click', () => {
