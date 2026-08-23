@@ -2638,6 +2638,19 @@
           screenPaymentDetail,
           screenSettings,
         ].forEach((s) => (s.hidden = s !== target))
+        try {
+          sessionStorage.setItem('hotink_screen', target.id)
+        } catch {}
+      }
+
+      /* Après un rafraîchissement : rouvrir la page où l'utilisateur était */
+      function restoreLastScreen() {
+        let id = null
+        try {
+          id = sessionStorage.getItem('hotink_screen')
+        } catch {}
+        const el = id && document.getElementById(id)
+        if (el && el.tagName === 'SECTION') showScreen(el)
       }
 
       /* ---------- Historique des factures ---------- */
@@ -3285,9 +3298,15 @@
         /* SDK non chargé (pas d'internet au démarrage) : mode local direct */
         if (!CLOUD_OK) {
           ov.hidden = true
+          restoreLastScreen()
           return
         }
         firebase.initializeApp(firebaseConfig)
+        /* Session conservée même après fermeture/rafraîchissement */
+        firebase
+          .auth()
+          .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+          .catch(() => {})
 
         const emailEl = document.getElementById('auth-email')
         const passEl = document.getElementById('auth-pass')
@@ -3336,6 +3355,9 @@
             okText: 'Déconnexion',
           })
           if (!yes) return
+          try {
+            sessionStorage.removeItem('hotink_screen')
+          } catch {}
           firebase.auth().signOut()
         })
 
@@ -3357,6 +3379,9 @@
           refreshClientDatalist()
           refreshNavLogo()
           ov.hidden = true
+          /* Session restaurée (rafraîchissement) : retour à la page d'origine ;
+             connexion fraîche : accueil */
+          if (!restoreLastScreen()) showScreen(screenHome)
           showToast('Connecté : données synchronisées.')
         })
       }
