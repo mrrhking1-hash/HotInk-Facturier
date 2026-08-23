@@ -704,18 +704,19 @@
         display: none;
       }
 
-      /* Écran de connexion : fond orange plein, pas de flou */
+      /* Écran de connexion : fond orange plein, pas de flou.
+         Logo blanc posé au-dessus de la carte. */
       #auth-overlay {
         background: #f97316;
         backdrop-filter: none;
+        flex-direction: column;
+        gap: 18px;
       }
 
       .auth-logo {
         display: block;
-        width: 84px;
-        height: 84px;
-        margin: 0 auto 12px;
-        border-radius: 20px;
+        width: 96px;
+        height: 96px;
       }
 
       .auth-logo[hidden] {
@@ -1102,8 +1103,8 @@
   <body>
     <!-- Connexion (données en ligne) -->
     <div id="auth-overlay" class="modal-overlay" hidden>
+      <img id="auth-logo" class="auth-logo" alt="" hidden />
       <div class="modal" style="max-width:300px">
-        <img id="auth-logo" class="auth-logo" alt="" hidden />
         <div class="modal-title">HotInk</div>
         <div class="field">
           <label for="auth-email">Email</label>
@@ -2079,19 +2080,17 @@
         refreshAppIcon()
       }
 
-      /* ---------- Icône de l'app (écran d'accueil du téléphone) ----------
-         Carré orange + logo en blanc uni, comme la navbar.
-         Sans logo : « h » blanc, la lettre de marque des factures. */
-      function drawAppIcon(size) {
+      /* ---------- Icône de l'app + logo blanc ----------
+         Marque en blanc uni sur fond transparent (logo ou « h »),
+         posée ensuite sur un carré orange pour l'icône d'accueil. */
+      function drawWhiteMark(size) {
         return new Promise((resolve) => {
           const c = document.createElement('canvas')
           c.width = size
           c.height = size
           const ctx = c.getContext('2d')
-          ctx.fillStyle = '#f97316'
-          ctx.fillRect(0, 0, size, size)
 
-          const finish = () => resolve(c.toDataURL('image/png'))
+          const finish = () => resolve(c)
           const logo = getCompanySettings().logo
 
           if (!logo) {
@@ -2111,7 +2110,7 @@
             const w = img.width * ratio
             const h = img.height * ratio
             /* Logo aplati en blanc pur : la forme vient de la transparence,
-               toutes les couleurs deviennent blanches sur fond orange. */
+               toutes les couleurs deviennent blanches. */
             const off = document.createElement('canvas')
             off.width = size
             off.height = size
@@ -2126,6 +2125,18 @@
           img.onerror = finish
           img.src = logo
         })
+      }
+
+      async function drawAppIcon(size) {
+        const mark = await drawWhiteMark(size)
+        const c = document.createElement('canvas')
+        c.width = size
+        c.height = size
+        const ctx = c.getContext('2d')
+        ctx.fillStyle = '#f97316'
+        ctx.fillRect(0, 0, size, size)
+        ctx.drawImage(mark, 0, 0)
+        return c.toDataURL('image/png')
       }
 
       function setLink(id, rel, href, type) {
@@ -3101,11 +3112,10 @@
           )
         })
 
-        /* Logo en blanc au-dessus du formulaire : même rendu que l'icône
-           (carré orange + marque blanche, le fond se confond avec la page). */
-        drawAppIcon(168).then((url) => {
+        /* Logo blanc au-dessus de la carte (fond transparent). */
+        drawWhiteMark(192).then((mark) => {
           const authLogo = document.getElementById('auth-logo')
-          authLogo.src = url
+          authLogo.src = mark.toDataURL('image/png')
           authLogo.hidden = false
         })
 
