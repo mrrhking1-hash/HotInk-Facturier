@@ -330,6 +330,33 @@
         font-variant-numeric: tabular-nums;
       }
 
+      /* TVA optionnelle sur la facture */
+      .tax-toggle {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #374151;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .tax-toggle input {
+        width: 18px;
+        height: 18px;
+        accent-color: #f97316;
+      }
+
+      .tax-hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #6b7280;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
       /* ---------- Catalogue ---------- */
       .choice-row {
         display: grid;
@@ -1055,6 +1082,20 @@
         color: #ea580c;
       }
 
+      .inv-subtotal {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #6b7280;
+        padding: 3px 0;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .inv-subtotal strong {
+        color: #374151;
+        font-weight: 600;
+      }
+
       /* Conditions collées au bas de la feuille */
       .inv-terms {
         margin-top: auto;
@@ -1271,6 +1312,11 @@
             <span>Montant total</span>
             <strong id="total-amount">0,00</strong>
           </div>
+          <label class="tax-toggle">
+            <input type="checkbox" id="apply-tax" />
+            <span>Appliquer la TVA (<span id="tax-rate-label">16%</span>)</span>
+          </label>
+          <div id="tax-hint" class="tax-hint" hidden></div>
 
           <div class="actions-row">
             <button id="btn-preview" class="btn-preview" type="button">Aperçu de la facture</button>
@@ -1541,6 +1587,22 @@
             <input type="number" id="set-terms-days" min="1" max="365" inputmode="numeric" />
           </div>
 
+          <div class="section-label">TVA</div>
+
+          <div class="row-2">
+            <div class="field">
+              <label for="set-tax-rate">Taux de TVA (%)</label>
+              <input type="number" id="set-tax-rate" min="0" max="100" step="0.5" inputmode="decimal" />
+            </div>
+            <div class="field">
+              <label for="set-tax-default">Sur les nouvelles factures</label>
+              <select id="set-tax-default">
+                <option value="no">Sans TVA</option>
+                <option value="yes">Avec TVA</option>
+              </select>
+            </div>
+          </div>
+
           <div class="field">
             <label>Logo de l'entreprise (affiché sur la facture)</label>
             <div class="logo-pick">
@@ -1763,6 +1825,11 @@
           .replace(/'/g, '&#39;')
       }
 
+      function getTaxRate() {
+        const s = getCompanySettings()
+        return Number.isFinite(Number(s.taxRate)) ? Number(s.taxRate) : COMPANY.taxRate
+      }
+
       function recalcTotal() {
         let total = 0
         itemsWrap.querySelectorAll('.item-row').forEach((row) => {
@@ -1771,7 +1838,22 @@
           total += qty * pu
         })
         const symbol = itemsWrap.querySelector('.currency-select')?.value || ''
-        document.getElementById('total-amount').textContent = `${fmt(total)} ${symbol}`
+        const rate = getTaxRate()
+        const apply = document.getElementById('apply-tax')
+        const hint = document.getElementById('tax-hint')
+        document.getElementById('tax-rate-label').textContent = `${rate}%`
+        if (apply.checked && rate > 0) {
+          const tva = total * (rate / 100)
+          document.getElementById('total-amount').textContent =
+            `${fmt(total + tva)} ${symbol}`
+          hint.hidden = false
+          hint.textContent =
+            `Total HT ${fmt(total)} ${symbol} · TVA ${rate}% ${fmt(tva)} ${symbol}`
+        } else {
+          document.getElementById('total-amount').textContent =
+            `${fmt(total)} ${symbol}`
+          hint.hidden = true
+        }
       }
 
       function addItemRow() {
@@ -1848,8 +1930,10 @@
           document.getElementById('client-name').value = ''
           itemsWrap.innerHTML = ''
           resetInvoiceDate()
-          recalcTotal()
         }
+        /* TVA par défaut selon les paramètres */
+        document.getElementById('apply-tax').checked =
+          !!getCompanySettings().taxOnByDefault
         if (!document.getElementById('invoice-date').value) resetInvoiceDate()
         docMode = kind
         document.getElementById('invoice-screen-title').textContent =
@@ -1861,6 +1945,8 @@
       document.getElementById('btn-new-invoice').addEventListener('click', () =>
         openNewDoc('facture'),
       )
+
+      document.getElementById('apply-tax').addEventListener('change', recalcTotal)
 
       document.getElementById('btn-new-proforma').addEventListener('click', () =>
         openNewDoc('proforma'),
@@ -1948,6 +2034,8 @@
         phone: '243853377600',
         termsTitle: 'Conditions et modalités de paiement',
         termsDays: 15,
+        taxRate: 16,
+        taxOnByDefault: false,
       }
 
       function termsTextFor(days) {
@@ -1968,7 +2056,13 @@
             items.push({ name, qty, price })
           }
         })
-        return { client, currency, items }
+        return {
+          client,
+          currency,
+          items,
+          applyTax: document.getElementById('apply-tax').checked,
+          taxRate: getTaxRate(),
+        }
       }
 
       function loadStore(key) {
@@ -2014,6 +2108,11 @@
           termsDays = m ? parseInt(m[1], 10) : COMPANY.termsDays
         }
         document.getElementById('set-terms-days').value = termsDays
+        document.getElementById('set-tax-rate').value =
+          Number.isFinite(Number(s.taxRate)) ? s.taxRate : COMPANY.taxRate
+        document.getElementById('set-tax-default').value = s.taxOnByDefault
+          ? 'yes'
+          : 'no'
         pendingLogo = s.logo || null
         refreshLogoPreview(pendingLogo)
       }
@@ -2049,14 +2148,43 @@
         reader.onload = () => {
           const img = new Image()
           img.onload = () => {
-            /* Réduction pour rester léger dans le navigateur */
-            const MAX = 320
+            /* Redimensionnement 256px + choix du format le plus léger :
+               JPEG si le dessin est opaque, sinon WebP/PNG pour garder
+               la transparence. Évite de saturer localStorage/Firebase. */
+            const MAX = 256
             const ratio = Math.min(1, MAX / Math.max(img.width, img.height))
             const c = document.createElement('canvas')
             c.width = Math.max(1, Math.round(img.width * ratio))
             c.height = Math.max(1, Math.round(img.height * ratio))
-            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
-            pendingLogo = c.toDataURL('image/png')
+            const ctx = c.getContext('2d')
+            ctx.drawImage(img, 0, 0, c.width, c.height)
+
+            const hasAlpha = (() => {
+              try {
+                const d = ctx.getImageData(
+                  0, 0, c.width, c.height,
+                ).data
+                for (let i = 3; i < d.length; i += 4) if (d[i] < 255) return true
+              } catch {}
+              return false
+            })()
+
+            if (hasAlpha) {
+              let out = c.toDataURL('image/webp', 0.9)
+              if (!out.startsWith('data:image/webp'))
+                out = c.toDataURL('image/png')
+              pendingLogo = out
+            } else {
+              /* JPEG : fond blanc derrière pour éviter le noir */
+              const flat = document.createElement('canvas')
+              flat.width = c.width
+              flat.height = c.height
+              const fctx = flat.getContext('2d')
+              fctx.fillStyle = '#ffffff'
+              fctx.fillRect(0, 0, flat.width, flat.height)
+              fctx.drawImage(c, 0, 0)
+              pendingLogo = flat.toDataURL('image/jpeg', 0.85)
+            }
             refreshLogoPreview(pendingLogo)
           }
           img.src = reader.result
@@ -2209,6 +2337,12 @@
         }
         const rawDays = parseInt(document.getElementById('set-terms-days').value, 10)
         const termsDays = Number.isFinite(rawDays) && rawDays > 0 ? rawDays : COMPANY.termsDays
+        const rawTax = parseFloat(
+          String(document.getElementById('set-tax-rate').value).replace(',', '.'),
+        )
+        const taxRate = Number.isFinite(rawTax) && rawTax >= 0 ? rawTax : COMPANY.taxRate
+        const taxOnByDefault =
+          document.getElementById('set-tax-default').value === 'yes'
         dbSave('hotink_settings', {
           name,
           rccm: document.getElementById('set-rccm').value.trim(),
@@ -2218,6 +2352,8 @@
           termsTitle: COMPANY.termsTitle,
           termsDays,
           termsText: termsTextFor(termsDays),
+          taxRate,
+          taxOnByDefault,
           logo: pendingLogo ? pendingLogo : '',
         })
         showToast('Paramètres enregistrés !')
@@ -2226,7 +2362,11 @@
 
       /* Construit le document A4 (utilisé par l'aperçu ET l'historique) */
       function invoiceDocHtml(inv, numStr, kind = 'facture') {
-        const total = inv.items.reduce((s, it) => s + it.qty * it.price, 0)
+        const totalHT = inv.items.reduce((s, it) => s + it.qty * it.price, 0)
+        const hasTax = !!inv.applyTax && Number(inv.taxRate) > 0
+        const taxRate = hasTax ? Number(inv.taxRate) : 0
+        const tva = totalHT * (taxRate / 100)
+        const total = totalHT + tva
         const S = getCompanySettings()
         const isPro = kind === 'proforma'
 
@@ -2273,7 +2413,10 @@
               <div class="inv-date">Le ${inv.dateLabel}</div>
             </div>
             ${tableHtml}
-            <div class="inv-total"><span>Total</span><strong>${fmt(total)} ${inv.currency}</strong></div>
+            ${hasTax ? `
+            <div class="inv-subtotal"><span>Total HT</span><strong>${fmt(totalHT)} ${inv.currency}</strong></div>
+            <div class="inv-subtotal"><span>TVA ${taxRate}%</span><strong>${fmt(tva)} ${inv.currency}</strong></div>` : ''}
+            <div class="inv-total"><span>${hasTax ? 'Total TTC' : 'Total'}</span><strong>${fmt(total)} ${inv.currency}</strong></div>
             <div class="inv-terms">
               <div class="inv-terms-title">${escapeHtml(S.termsTitle)}</div>
               <div class="inv-terms-text">${escapeHtml(S.termsText)}</div>
@@ -2394,6 +2537,8 @@
             client: inv.client,
             currency: inv.currency,
             items: inv.items,
+            applyTax: inv.applyTax,
+            taxRate: inv.taxRate,
             dateLabel: getInvoiceDate().toLocaleDateString('fr-FR'),
           },
           numStr,
@@ -2454,12 +2599,15 @@
         const isPro = docMode === 'proforma'
         if (!isPro && !applyStockForInvoice(inv.items)) return
         const list = isPro ? getProformas() : getInvoices()
+        const totalHT = inv.items.reduce((s, it) => s + it.qty * it.price, 0)
+        const tva = inv.applyTax && inv.taxRate > 0 ? totalHT * (inv.taxRate / 100) : 0
         const record = {
           id: Date.now(),
           number: isPro ? nextProformaNumber(list) : nextInvoiceNumber(list),
           kind: docMode,
           ...inv,
-          total: inv.items.reduce((s, it) => s + it.qty * it.price, 0),
+          totalHT,
+          total: totalHT + tva,
           date: getInvoiceDate().toISOString(),
         }
         list.unshift(record)
@@ -3022,17 +3170,72 @@
 
       const CLOUD_OK = typeof firebase !== 'undefined'
 
+      /* ---------- File d'attente de synchronisation ----------
+         Toute écriture reste d'abord locale. Si le cloud est inaccessible
+         (pas encore connecté, coupure réseau…), elle est mise en attente
+         puis poussée automatiquement dès que la connexion revient. */
+      const PENDING_KEY = 'hotink_pending'
+
+      function loadPending() {
+        try {
+          return JSON.parse(localStorage.getItem(PENDING_KEY) || '{}')
+        } catch {
+          return {}
+        }
+      }
+
+      function markPending(key, value) {
+        const q = loadPending()
+        q[key] = value
+        try {
+          localStorage.setItem(PENDING_KEY, JSON.stringify(q))
+        } catch {}
+      }
+
+      let syncFlushing = false
+      async function flushPendingQueue() {
+        if (syncFlushing || !CLOUD_OK || !firebase.auth().currentUser) return
+        let q = loadPending()
+        if (Object.keys(q).length === 0) return
+        syncFlushing = true
+        try {
+          for (const k of Object.keys(q)) {
+            await cloudDataRef().child(k).set(q[k])
+            q = loadPending()
+            delete q[k]
+            localStorage.setItem(PENDING_KEY, JSON.stringify(q))
+          }
+          showToast('Données synchronisées.')
+        } catch {
+          /* Toujours sans réseau : la file attend le prochain essai */
+        } finally {
+          syncFlushing = false
+        }
+      }
+
+      window.addEventListener('online', flushPendingQueue)
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) flushPendingQueue()
+      })
+      setInterval(flushPendingQueue, 60000)
+
       /* Chaque écriture va dans le cache local ET dans le cloud :
          l'app reste utilisable hors ligne et se resynchronise ensuite */
       function dbSave(key, value) {
         localStorage.setItem(key, JSON.stringify(value))
-        if (!CLOUD_OK || !firebase.auth().currentUser) return
+        if (!CLOUD_OK || !firebase.auth().currentUser) {
+          markPending(key, value)
+          return
+        }
         cloudDataRef()
           .child(key)
           .set(value)
-          .catch(() =>
-            showToast('Sauvegarde en ligne impossible : gardé sur cet appareil.'),
-          )
+          .then(() => {
+            const q = loadPending()
+            delete q[key]
+            localStorage.setItem(PENDING_KEY, JSON.stringify(q))
+          })
+          .catch(() => markPending(key, value))
       }
 
       function cloudDataRef() {
@@ -3148,6 +3351,8 @@
           } catch {
             showToast('Données en ligne inaccessibles : contenu local affiché.')
           }
+          /* Les modifications faites hors ligne passent maintenant au cloud */
+          flushPendingQueue()
           refreshDatalist()
           refreshClientDatalist()
           refreshNavLogo()
@@ -3161,6 +3366,12 @@
       refreshClientDatalist()
       refreshNavLogo()
       initCloud()
+
+      /* Mode hors-ligne : cache de l'app et des librairies CDN.
+         Ne fonctionne qu'en http(s) — ignoré en ouverture fichier local. */
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {})
+      }
     </script>
   </body>
 </html>
