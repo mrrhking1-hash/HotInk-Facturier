@@ -726,6 +726,52 @@
         z-index: 300;
       }
 
+      /* Bandeau connexion / synchronisation */
+      .sync-banner {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(480px, 100vw);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 10px 16px;
+        font-size: 12.5px;
+        font-weight: 700;
+        z-index: 500;
+      }
+
+      .sync-banner[hidden] {
+        display: none;
+      }
+
+      .sync-banner.warn {
+        background: #b45309;
+        color: #ffffff;
+      }
+
+      .sync-banner.busy {
+        background: #1f2937;
+        color: #ffffff;
+      }
+
+      .sync-spin {
+        width: 13px;
+        height: 13px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: sync-rotate 0.7s linear infinite;
+      }
+
+      @keyframes sync-rotate {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
       /* Le display:flex ci-dessus écraserait l'attribut hidden sans cette règle */
       .modal-overlay[hidden] {
         display: none;
@@ -1147,6 +1193,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   </head>
   <body>
+    <!-- Bandeau état connexion / synchronisation -->
+    <div id="sync-banner" class="sync-banner" hidden>
+      <span class="sync-spin" id="sync-spin" hidden></span>
+      <span id="sync-banner-txt"></span>
+    </div>
+
     <!-- Connexion (données en ligne) : visible par défaut pour masquer
          l'interface tant que l'utilisateur n'est pas connecté -->
     <div id="auth-overlay" class="modal-overlay">
@@ -3183,6 +3235,29 @@
 
       const CLOUD_OK = typeof firebase !== 'undefined'
 
+      /* ---------- Bandeau connexion / synchronisation ---------- */
+      function showBanner(mode, text) {
+        const b = document.getElementById('sync-banner')
+        b.className = 'sync-banner ' + mode
+        document.getElementById('sync-spin').hidden = mode !== 'busy'
+        document.getElementById('sync-banner-txt').textContent = text
+        b.hidden = false
+      }
+
+      function hideBanner() {
+        document.getElementById('sync-banner').hidden = true
+      }
+
+      function setOfflineBanner() {
+        if (!navigator.onLine)
+          showBanner(
+            'warn',
+            'Mode hors ligne : les données seront synchronisées dès le retour de la connexion.',
+          )
+      }
+
+      window.addEventListener('offline', setOfflineBanner)
+
       /* ---------- File d'attente de synchronisation ----------
          Toute écriture reste d'abord locale. Si le cloud est inaccessible
          (pas encore connecté, coupure réseau…), elle est mise en attente
@@ -3211,6 +3286,8 @@
         let q = loadPending()
         if (Object.keys(q).length === 0) return
         syncFlushing = true
+        showBanner('busy', 'Synchronisation des données…')
+        let ok = true
         try {
           for (const k of Object.keys(q)) {
             await cloudDataRef().child(k).set(q[k])
@@ -3218,12 +3295,18 @@
             delete q[k]
             localStorage.setItem(PENDING_KEY, JSON.stringify(q))
           }
-          showToast('Données synchronisées.')
         } catch {
-          /* Toujours sans réseau : la file attend le prochain essai */
+          ok = false
         } finally {
           syncFlushing = false
+          if (ok && !navigator.onLine) setOfflineBanner()
+          else hideBanner()
         }
+        if (ok) showToast('Données synchronisées avec succès.')
+        else
+          showToast(
+            'Échec de la synchronisation : nouvelle tentative dès le retour du réseau.',
+          )
       }
 
       window.addEventListener('online', flushPendingQueue)
@@ -3248,7 +3331,10 @@
             delete q[key]
             localStorage.setItem(PENDING_KEY, JSON.stringify(q))
           })
-          .catch(() => markPending(key, value))
+          .catch(() => {
+            markPending(key, value)
+            setOfflineBanner()
+          })
       }
 
       function cloudDataRef() {
@@ -3312,12 +3398,49 @@
         const passEl = document.getElementById('auth-pass')
         const errEl = document.getElementById('auth-error')
 
+        /* Identifiants gardés localement pour se reconnecter tout seul :
+           certains contextes (ouverture fichier local…) ne conservent pas
+           la session Firebase d'un rafraîchissement à l'autre. */
+        function loadCreds() {
+          try {
+            return JSON.parse(localStorage.getItem('hotink_creds') || 'null')
+          } catch {
+            return null
+          }
+        }
+        function saveCreds(email, pass) {
+          try {
+            localStorage.setItem(
+              'hotink_creds',
+              JSON.stringify({ email, pass }),
+            )
+          } catch {}
+        }
+        function clearCreds() {
+          try {
+            localStorage.removeItem('hotink_creds')
+          } catch {}
+        }
+
+        let silentLoginTried = false
+        async function silentLogin() {
+          silentLoginTried = true
+          const c = loadCreds()
+          if (!c || !c.email || !c.pass) return null
+          try {
+            return await firebase.auth().signInWithEmailAndPassword(c.email, c.pass)
+          } catch {
+            return null
+          }
+        }
+
         async function doLogin() {
           errEl.hidden = true
           try {
             await firebase
               .auth()
               .signInWithEmailAndPassword(emailEl.value.trim(), passEl.value)
+            saveCreds(emailEl.value.trim(), passEl.value)
           } catch (e) {
             errEl.textContent = mapAuthError(e && e.code)
             errEl.hidden = false
@@ -3358,31 +3481,52 @@
           try {
             sessionStorage.removeItem('hotink_screen')
           } catch {}
+          clearCreds()
           firebase.auth().signOut()
+        })
+
+        /* Réseau revenu : retenter la reconnexion silencieuse si besoin */
+        window.addEventListener('online', () => {
+          if (!silentLoginTried || firebase.auth().currentUser) return
+          silentLogin().then((u) => {
+            if (!u) showToast('Reconnexion requise.')
+          })
         })
 
         firebase.auth().onAuthStateChanged(async (user) => {
           if (!user) {
+            /* Pas de session restaurée : essayer de se reconnecter seul */
+            const u = await silentLogin().catch(() => null)
+            if (u && firebase.auth().currentUser) return
+            /* Réseau coupé : entrer quand même en mode local,
+               plutôt que d'imposer l'écran de connexion */
+            if (!navigator.onLine) {
+              ov.hidden = true
+              restoreLastScreen()
+              setOfflineBanner()
+              return
+            }
             passEl.value = ''
             ov.hidden = false
             emailEl.focus()
             return
           }
+          showBanner('busy', 'Synchronisation des données…')
           try {
             await pullCloudData()
           } catch {
             showToast('Données en ligne inaccessibles : contenu local affiché.')
           }
           /* Les modifications faites hors ligne passent maintenant au cloud */
-          flushPendingQueue()
+          await flushPendingQueue()
           refreshDatalist()
           refreshClientDatalist()
           refreshNavLogo()
           ov.hidden = true
+          hideBanner()
           /* Session restaurée (rafraîchissement) : retour à la page d'origine ;
              connexion fraîche : accueil */
           if (!restoreLastScreen()) showScreen(screenHome)
-          showToast('Connecté : données synchronisées.')
         })
       }
 
@@ -3391,6 +3535,7 @@
       refreshClientDatalist()
       refreshNavLogo()
       initCloud()
+      setOfflineBanner()
 
       /* Mode hors-ligne : cache de l'app et des librairies CDN.
          Ne fonctionne qu'en http(s) — ignoré en ouverture fichier local. */
