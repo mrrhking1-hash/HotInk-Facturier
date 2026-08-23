@@ -715,8 +715,8 @@
 
       .auth-logo {
         display: block;
-        width: 96px;
-        height: 96px;
+        width: 150px;
+        height: 150px;
       }
 
       .auth-logo[hidden] {
@@ -1101,8 +1101,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   </head>
   <body>
-    <!-- Connexion (données en ligne) -->
-    <div id="auth-overlay" class="modal-overlay" hidden>
+    <!-- Connexion (données en ligne) : visible par défaut pour masquer
+         l'interface tant que l'utilisateur n'est pas connecté -->
+    <div id="auth-overlay" class="modal-overlay">
       <img id="auth-logo" class="auth-logo" alt="" hidden />
       <div class="modal" style="max-width:300px">
         <div class="modal-title">HotInk</div>
@@ -3119,9 +3120,14 @@
           authLogo.hidden = false
         })
 
-        document.getElementById('btn-logout').addEventListener('click', () => {
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+          const yes = await showConfirm({
+            title: 'Se déconnecter',
+            message: 'Voulez-vous vraiment vous déconnecter ?',
+            okText: 'Déconnexion',
+          })
+          if (!yes) return
           firebase.auth().signOut()
-          showScreen(screenHome)
         })
 
         firebase.auth().onAuthStateChanged(async (user) => {
